@@ -1,0 +1,6 @@
+name: design-system-publishing
+recipe: pantheon
+config:
+  framework: wordpress
+  site: design-system-publishing
+  id: 94063057-72c6-4776-a1ba-3aeed3ef5675
