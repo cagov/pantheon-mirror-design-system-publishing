@@ -3,11 +3,11 @@
 Plugin Name: Media Library Folders for WordPress
 Plugin URI: http://maxgalleria.com
 Description: Gives you the ability to adds folders and move files in the WordPress Media Library.
-Version: 7.0.8
+Version: 7.1.0
 Author: Max Foundry
 Author URI: http://maxfoundry.com
 
-Copyright 2015-2021 Max Foundry, LLC (http://maxfoundry.com)
+Copyright 2015-2022 Max Foundry, LLC (http://maxfoundry.com)
 */
 
 if(defined('MAXGALLERIA_MEDIA_LIBRARY_VERSION_KEY')) {
@@ -52,11 +52,12 @@ class MaxGalleriaMediaLib {
 
 	public function set_global_constants() {	
 		define('MAXGALLERIA_MEDIA_LIBRARY_VERSION_KEY', 'maxgalleria_media_library_version');
-		define('MAXGALLERIA_MEDIA_LIBRARY_VERSION_NUM', '7.0.8');
+		define('MAXGALLERIA_MEDIA_LIBRARY_VERSION_NUM', '7.1.0');
 		define('MAXGALLERIA_MEDIA_LIBRARY_IGNORE_NOTICE', 'maxgalleria_media_library_ignore_notice');
 		define('MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_NAME', trim(dirname(plugin_basename(__FILE__)), '/'));
 		define('MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_DIR', WP_PLUGIN_DIR . '/' . MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_NAME);
-		define('MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL', plugin_dir_url('') . MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_NAME);
+		define('MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL', rtrim(plugin_dir_url(__FILE__), '/'));
+    
     define("MAXGALLERIA_MEDIA_LIBRARY_NONCE", "mgmlp_nonce");
     define("MAXGALLERIA_MEDIA_LIBRARY_POST_TYPE", "mgmlp_media_folder");
     define("MAXGALLERIA_MEDIA_LIBRARY_UPLOAD_FOLDER_NAME", "mgmlp_upload_folder_name");
@@ -90,8 +91,8 @@ class MaxGalleriaMediaLib {
     define("MAXGALLERIA_DISABLE_SCALLING", "mlfp_disable_scaling");
 		if(!defined('MAXGALLERIA_MLP_ITEMS_PRE_PAGE'))
 		  define("MAXGALLERIA_MLP_ITEMS_PRE_PAGE", "mlf_items_per_page");		
+    define('MLF_WP_CONTENT_FOLDER_NAME', basename(WP_CONTENT_DIR));
 		
-    
 		// Bring in all the actions and filters
 		require_once MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_DIR . '/maxgalleria-media-library-hooks.php';
 	}
@@ -209,25 +210,22 @@ class MaxGalleriaMediaLib {
       
       if($_REQUEST['page'] === 'media-library-folders' 
 				|| $_REQUEST['page'] === 'mlp-support' 
-				|| $_REQUEST['page'] === 'mlfp-settings' 
+				|| $_REQUEST['page'] === 'mlpp-settings' 
 				|| $_REQUEST['page'] === 'image-seo' 
 				|| $_REQUEST['page'] === 'mlp-regenerate-thumbnails' 
 				|| $_REQUEST['page'] === 'search-library' ) {
         
         wp_enqueue_style('thickbox');
-        wp_enqueue_style('maxgalleria-media-library', MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/maxgalleria-media-library.css');
-        //wp_enqueue_style('foundation', MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/libs/foundation/foundation.min.css');    
-				
-				
-				
+        wp_enqueue_style('maxgalleria-media-library', esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/maxgalleria-media-library.css'));
+								
       } else if ($_REQUEST['page'] === 'mlp-upgrade-to-pro') {
-        wp_enqueue_style('media-library-upgrade-to-pro', MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/css/upgrade-to-pro.css');
+        wp_enqueue_style('media-library-upgrade-to-pro', esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/css/upgrade-to-pro.css'));
 			}
 			
       if($_REQUEST['page'] === 'mlp-regenerate-thumbnails' ||
 				 $_REQUEST['page'] === 'mlp-support' ||
 				 $_REQUEST['page'] === 'image-seo') {
-        wp_enqueue_style('maxgalleria-media-library', MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/maxgalleria-media-library.css');
+        wp_enqueue_style('maxgalleria-media-library', esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/maxgalleria-media-library.css'));
 				
 				wp_enqueue_script('jquery');
         
@@ -240,7 +238,7 @@ class MaxGalleriaMediaLib {
       if($_REQUEST['page'] === 'media-library-folders' || 
 				 $_REQUEST['page'] === 'search-library') {
 		
-				wp_enqueue_style('jstree-style', MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/js/jstree/themes/default/style.min.css');    		
+				wp_enqueue_style('jstree-style', esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/js/jstree/themes/default/style.css'));    		
         
 				wp_enqueue_script('jquery');
         
@@ -257,15 +255,14 @@ class MaxGalleriaMediaLib {
         wp_enqueue_script('jquery-ui-selectable');
         wp_enqueue_script('jquery-ui-sortable');
 
-				wp_register_script('jstree', MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/js/jstree/jstree.min.js', array('jquery'));
+				wp_register_script('jstree', esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/js/jstree/jstree.min.js'), array('jquery'));
 				wp_enqueue_script('jstree');
 				
 			}
 			
     }
 		
-    wp_enqueue_style('mlp-notice', MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/css/mlp-notice.css');
-		
+    wp_enqueue_style('mlp-notice', esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/css/mlp-notice.css'));
 		
  }
   
@@ -273,23 +270,13 @@ class MaxGalleriaMediaLib {
     global $pagenow, $current_screen;
     $mlf_page = false;
     
-    //error_log("page " . $_REQUEST['page']);
     if(isset($_REQUEST['page'])) {
       if($_REQUEST['page'] == 'media-library-folders')
         $mlf_page = true;
     }
     
 	  if($this->current_user_can_upload || defined('MLFP_SKIP_UPLOAD_STATUS_CHECK') ) {
-	
-//      if (isset( $current_screen ) && 
-//          $current_screen->base != 'all-import_page_pmxi-admin-import' && 
-//          $current_screen->base != 'all-import_page_pmxi-admin-manage' &&
-//          $current_screen->post_type != 'acf-field-group' &&
-//          $current_screen->base != 'pmxi-admin-manage' && 
-//          $current_screen->base != 'pmxi-admin-import') {
-        
-        
-      //if (isset( $current_screen ) && 
+	              
       if(isset($current_screen) || $mlf_page) {
         if( $mlf_page || 
           $current_screen->base == 'toplevel_page_media-library-folders' ||
@@ -297,24 +284,22 @@ class MaxGalleriaMediaLib {
           $current_screen->base == 'media-library-folders_page_mlp-support' ||              
           $current_screen->base == 'media-library-folders_page_mlp-regenerate-thumbnails' ||              
           $current_screen->base == 'media-library-folders_page_image-seo') {         
-
-          //error_log(print_r($current_screen, true));    
           
             wp_enqueue_script('jquery');
-            wp_enqueue_script('jquery-migrate', ABSPATH . WPINC . '/js/jquery/jquery-migrate.min.js', array('jquery'));            
+            wp_enqueue_script('jquery-migrate', esc_url(ABSPATH . WPINC . '/js/jquery/jquery-migrate.min.js'), array('jquery'));            
                     
-            wp_register_script( 'loader-folders', MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/js/mgmlp-loader.js', array( 'jquery' ), '', true );
+            wp_register_script( 'loader-folders', esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/js/mgmlp-loader.js'), array( 'jquery' ), '', true );
 
             wp_localize_script( 'loader-folders', 'mgmlp_ajax', 
                   array( 'ajaxurl' => admin_url( 'admin-ajax.php' ),
-                         'confirm_file_delete' => __('Are you sure you want to delete the selected files?', 'maxgalleria-media-library' ),
-                         'nothing_selected' => __('No items were selected.', 'maxgalleria-media-library' ),
-                         'no_images_selected' => __('No images were selected.', 'maxgalleria-media-library' ),
-                         'no_quotes' => __('Folder names cannot contain single or double quotes.', 'maxgalleria-media-library' ),
-                         'no_spaces' => __('Folder names cannot contain spaces.', 'maxgalleria-media-library' ),
-                         'no_blank' => __('The folder name cannot be blank.' ),
-                         'no_blank_filename' => __('The new file name cannot be blank.' ),                  
-                         'valid_file_name' => __('Please enter a valid file name with no spaces.', 'maxgalleria-media-library' ),
+                         'confirm_file_delete' => esc_html__('Are you sure you want to delete the selected files?', 'maxgalleria-media-library' ),
+                         'nothing_selected' => esc_html__('No items were selected.', 'maxgalleria-media-library' ),
+                         'no_images_selected' => esc_html__('No images were selected.', 'maxgalleria-media-library' ),
+                         'no_quotes' => esc_html__('Folder names cannot contain single or double quotes.', 'maxgalleria-media-library' ),
+                         'no_spaces' => esc_html__('Folder names cannot contain spaces.', 'maxgalleria-media-library' ),
+                         'no_blank' => esc_html__('The folder name cannot be blank.' ),
+                         'no_blank_filename' => esc_html__('The new file name cannot be blank.' ),                  
+                         'valid_file_name' => esc_html__('Please enter a valid file name with no spaces.', 'maxgalleria-media-library' ),
                          'nonce'=> wp_create_nonce(MAXGALLERIA_MEDIA_LIBRARY_NONCE))
                        ); 
 
@@ -460,6 +445,7 @@ class MaxGalleriaMediaLib {
     // in case an image is uploaded in the WP media library we
   // need to add a record to the mgmlp_folders table
   public function add_attachment_to_folder ($post_id) {
+  error_log("add_attachment_to_folder");
     
     $folder_id = $this->get_default_folder($post_id); //for non pro version
     if($folder_id !== false) {
@@ -468,39 +454,36 @@ class MaxGalleriaMediaLib {
   }
   
 public function add_attachment_to_folder2( $metadata, $attachment_id ) {
+  error_log("add_attachment_to_folder2");
     
-    $folder_id = $this->get_default_folder($attachment_id);
-    //error_log("add_attachment_to_folder2 folder_id $folder_id");
-    if($folder_id !== false) {
-      $this->add_new_folder_parent($attachment_id, $folder_id);
-      
-    }
-    return $metadata;
-  }  
+  $folder_id = $this->get_default_folder($attachment_id);
+  if($folder_id !== false && $folder_id != null) {
+    $this->add_new_folder_parent($attachment_id, $folder_id);
+
+  }
+  return $metadata;
+}  
+
+public function get_parent_by_name($sub_folder) {
     
-  public function get_parent_by_name($sub_folder) {
-    
-    global $wpdb;
-    
-    $sql = "SELECT post_id FROM {$wpdb->prefix}postmeta where meta_key = '_wp_attached_file' and `meta_value` = '$sub_folder'";
-    
-    return $wpdb->get_var($sql);
+  global $wpdb;
+
+  $sql = "SELECT post_id FROM {$wpdb->prefix}postmeta where meta_key = '_wp_attached_file' and `meta_value` = '$sub_folder'";
+
+  return $wpdb->get_var($sql);
 }
-  
   
   public function get_default_folder($post_id) {
     
     $attached_file = get_post_meta($post_id, '_wp_attached_file', true);
     $folder_path = dirname($attached_file);
-    //error_log("get_default_folder $folder_path");
+    
     $upload_folder_id = get_option(MAXGALLERIA_MEDIA_LIBRARY_UPLOAD_FOLDER_ID);
-    //error_log("upload_folder_id $upload_folder_id");
     
     if($folder_path == '.') {
       $folder_id = $upload_folder_id;
     } else {
       $folder_id = $this->get_parent_by_name($folder_path);
-      //error_log("get_parent_by_name $folder_id");
     }
     return $folder_id;
   }
@@ -549,17 +532,17 @@ public function add_attachment_to_folder2( $metadata, $attachment_id ) {
     $uploads_path = wp_upload_dir();
     
     if ((isset($_POST['folder_id'])) && (strlen(trim($_POST['folder_id'])) > 0))
-      $folder_id = trim(stripslashes(strip_tags($_POST['folder_id'])));
+      $folder_id = trim(sanitize_text_field($_POST['folder_id']));
     else
       $folder_id = 0;
     
     if ((isset($_POST['title_text'])) && (strlen(trim($_POST['title_text'])) > 0))
-      $seo_title_text = trim(stripslashes(strip_tags($_POST['title_text'])));
+      $seo_title_text = trim(sanitize_text_field($_POST['title_text']));
     else
       $seo_title_text = "";
 		
     if ((isset($_POST['alt_text'])) && (strlen(trim($_POST['alt_text'])) > 0))
-      $alt_text = trim(stripslashes(strip_tags($_POST['alt_text'])));
+      $alt_text = trim(sanitize_text_field($_POST['alt_text']));
     else
       $alt_text = "";
 		
@@ -567,7 +550,7 @@ public function add_attachment_to_folder2( $metadata, $attachment_id ) {
         
     if(isset($_FILES['file'])){
       if ( 0 < $_FILES['file']['error'] ) {
-         echo 'Error: ' . $_FILES['file']['error'] . '<br>';
+         echo esc_html('Error: ' . $_FILES['file']['error'] . '<br>');
       } else {
 
 
@@ -577,11 +560,11 @@ public function add_attachment_to_folder2( $metadata, $attachment_id ) {
           //error_log(print_r($wp_filetype,true));
 
           if ($wp_filetype['ext'] === false) {
-            echo '<script>' , PHP_EOL;
-            echo '  jQuery("#folder-message").html("<span class=\"mlp-warning\">';
-            echo $_FILES['file']['name'] . __(' file\'s type is invalid.', 'maxgalleria-media-library');
-            echo '</span>");';
-            echo '</script>' , PHP_EOL;
+            ?>
+            <script>
+            jQuery("#folder-message").html("<span class='mlp-warning'><?php echo esc_html($_FILES['file']['name'] . esc_html__(' file\'s type is invalid.', 'maxgalleria-media-library')); ?></span>");
+            </script>
+            <?php            
             exit;
           }
         }  
@@ -609,13 +592,11 @@ public function add_attachment_to_folder2( $metadata, $attachment_id ) {
 
           }
         } else {
-
-           echo '<script>' , PHP_EOL;
-           echo '  jQuery("#folder-message").html("<span class=\"mlp-warning\">';
-           echo __(' Unable to move the file to the destination folder; the folder may not exist.', 'maxgalleria-media-library');
-           echo '</span>");';
-           echo '</script>' , PHP_EOL;
-
+          ?>
+          <script>
+            jQuery("#folder-message").html("<span class='mlp-warning'><?php esc_html__(' Unable to move the file to the destination folder; the folder may not exist.', 'maxgalleria-media-library') ?></span>");
+          </script>
+          <?php
         }
       }
     }    
@@ -623,6 +604,8 @@ public function add_attachment_to_folder2( $metadata, $attachment_id ) {
   }
       
   public function add_new_attachment($filename, $folder_id, $title_text="", $alt_text="", $seo_title_text="") {
+    
+    error_log("add_new_attachment");
 
     global $is_IIS;
     $parent_post_id = 0;
@@ -670,6 +653,8 @@ public function add_attachment_to_folder2( $metadata, $attachment_id ) {
 			
 			$file_name = $this->remove_extension(basename($filename));
 			
+      $file_name = str_replace('-', ' ', $file_name);      
+			
 			$new_file_title = $seo_title_text;
 			
 			$new_file_title = str_replace('%foldername', $folder_name, $new_file_title );			
@@ -699,7 +684,6 @@ public function add_attachment_to_folder2( $metadata, $attachment_id ) {
     );
     
     // Insert the attachment.
-    //$attach_id = wp_insert_attachment( $attachment, $filename, $parent_post_id );    
     if (! ($attach_id = get_file_attachment_id($filename))) {
       $attach_id = wp_insert_attachment( $attachment, $filename, $parent_post_id );
     }
@@ -710,12 +694,6 @@ public function add_attachment_to_folder2( $metadata, $attachment_id ) {
     // Make sure that this file is included, as wp_generate_attachment_metadata() depends on it.
     require_once( ABSPATH . 'wp-admin/includes/image.php' );
 
-    // Generate the metadata for the attachment, and update the database record.
-    //if ($is_IIS || strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' || strtoupper(substr(PHP_OS, 0, 13)) == 'MICROSOFT-IIS' )
-    //  $attach_data = wp_generate_attachment_metadata( $attach_id, addslashes($filename));
-    //else
-    //  $attach_data = wp_generate_attachment_metadata( $attach_id, $filename );
-    
     // Generate the metadata for the attachment (if it doesn't already exist), and update the database record.
     if (! wp_get_attachment_metadata($attach_id, TRUE)) {
       if ($is_IIS || strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' || strtoupper(substr(PHP_OS, 0, 13)) == 'MICROSOFT-IIS' )
@@ -762,7 +740,7 @@ public function add_attachment_to_folder2( $metadata, $attachment_id ) {
     else
       return substr($file_name, 0, $position);
   }
-  	  
+  
   public function scan_attachments () {
     
     global $wpdb;
@@ -770,21 +748,24 @@ public function add_attachment_to_folder2( $metadata, $attachment_id ) {
     $uploads_path = wp_upload_dir();
     
     if(!$uploads_path['error']) {
-			
-      //echo "<p id='scanning-message'>" . _e('Scanning the Media Library for existing folders...Please wait.', 'maxgalleria-media-library' ) . "</p>";      
-			//
+			      
       //find the uploads folder
       $base_url = $uploads_path['baseurl'];
       $last_slash = strrpos($base_url, '/');
       $uploads_dir = substr($base_url, $last_slash+1);
 			$this->uploads_folder_name = $uploads_dir;
 			$this->uploads_folder_name_length = strlen($uploads_dir);
-      
+            
       update_option(MAXGALLERIA_MEDIA_LIBRARY_UPLOAD_FOLDER_NAME, $uploads_dir);
                               
       //create uploads parent media folder      
       $uploads_parent_id = $this->add_media_folder($uploads_dir, 0, $base_url);
       update_option(MAXGALLERIA_MEDIA_LIBRARY_UPLOAD_FOLDER_ID, $uploads_parent_id);
+      
+      $baseurl = $this->upload_dir['baseurl'];
+      // use for comparisons 
+      $uploads_base_url = rtrim($baseurl, '/');
+      $baseurl = rtrim($baseurl, '/') . '/';
       
       $sql = "SELECT ID, pm.meta_value as attached_file 
 FROM {$wpdb->prefix}posts
@@ -805,16 +786,17 @@ ORDER by ID";
 				if( strpos($row->attached_file, "http:") !== false || 
 						strpos($row->attached_file, "https:") !== false || 
 						strpos($row->attached_file, "'") !== false)  {
-					  $this->write_log("bad file path: $row->ID $row->attached_file");						
 				} else {
 									
-					  //$image_location = $this->upload_dir['baseurl'] . '/' . $row->attached_file;
-						$baseurl = $this->upload_dir['baseurl'];
-						$baseurl = rtrim($baseurl, '/') . '/';
 						$image_location = $baseurl . ltrim($row->attached_file, '/');
+            
+            // check for and add files in the uploads or root media library folder
+            $uploads_location = $this->strip_base_file($image_location);
+            if($uploads_base_url == $uploads_location) {
+              $this->add_new_folder_parent($row->ID, $uploads_parent_id);
+              continue;
+            }  
 																          
-          //if(strpos($image_location, $uploads_dir)) {
-										                    
             $sub_folders = $this->get_folders($image_location);
             $attachment_file = array_pop($sub_folders);  
 
@@ -831,17 +813,15 @@ ORDER by ID";
               if($new_parent_id === false) {
                 if($this->is_new_top_level_folder($uploads_dir, $sub_folder, $folder_path)) {
                   $parent_id = $this->add_media_folder($sub_folder, $uploads_parent_id, $folder_path); 
-                }  
-                else {
+                } else {
                   $parent_id = $this->add_media_folder($sub_folder, $parent_id, $folder_path); 
                 }  
-              }  
-              else
+              } else {
                 $parent_id = $new_parent_id;
+              }  
             }          
 
             $this->add_new_folder_parent($row->ID, $parent_id );
-          //} //test for ?
 				  } // test for http
         } //foreach         
         
@@ -855,24 +835,32 @@ ORDER by ID";
 //		die();
         
   }
-     
+  
+  public function strip_base_file($url){
+    $parts = explode("/", $url);
+    if(count($parts) < 4) return $url . "/";
+    if(strpos(end($parts), ".") !== false){ 
+        array_pop($parts); 
+    }else if(end($parts) !== ""){ 
+      $parts[] = ""; 
+    }
+    
+    return implode("/", $parts);
+  }  
+  	       
   private function is_new_top_level_folder($uploads_dir, $folder_name, $folder_path) {
     
     $needle = $uploads_dir . '/' . $folder_name;
-    if(strpos($folder_path, $needle))
+    if(strpos($folder_path . '/' , $needle . '/'))        
       return true;
     else
       return false;   
   }
 
   private function get_folders($path) {
-    //error_log("get_folders");
     $sub_folders = explode('/', $path);
-    //error_log(print_r($sub_folders));
-    //error_log("uploads_folder_name " . $this->uploads_folder_name);
     while( $sub_folders[0] !== $this->uploads_folder_name ) {
       array_shift($sub_folders);
-      //error_log(print_r($sub_folders));
     } 
     
     if($sub_folders[0] === $this->uploads_folder_name) 
@@ -893,20 +881,9 @@ ORDER by ID";
     
     global $wpdb;    
     
-    //error_log("base url " . $this->upload_dir['baseurl']);
-    //error_log(" base_url_length " . $this->base_url_length);
-    //error_log("folder_path $folder_path");
-		
 		$relative_path = substr($folder_path, $this->base_url_length);
 		$relative_path = ltrim($relative_path, '/');
     
-    //error_log("relative_path $relative_path");
-						    
-//		$sql = "select post_id
-//from {$wpdb->prefix}postmeta 
-//where meta_key = '_wp_attached_file' 
-//and meta_value = '$relative_path'";
-
 		$sql = "SELECT ID FROM {$wpdb->prefix}posts
 LEFT JOIN {$wpdb->prefix}postmeta AS pm ON pm.post_id = ID
 WHERE pm.meta_value = '$relative_path' 
@@ -925,8 +902,7 @@ and pm.meta_key = '_wp_attached_file'";
     global $wpdb;    
     $table = $wpdb->prefix . "posts";	    
 		
-    $new_folder_id = $this->mpmlp_insert_post(MAXGALLERIA_MEDIA_LIBRARY_POST_TYPE, 
-    $folder_name, $base_path, 'publish' );
+    $new_folder_id = $this->mpmlp_insert_post(MAXGALLERIA_MEDIA_LIBRARY_POST_TYPE, $folder_name, $base_path, 'publish' );
 
 		$attachment_location = substr($base_path, $this->base_url_length);
 		$attachment_location = ltrim($attachment_location, '/');
@@ -960,20 +936,19 @@ and pm.meta_key = '_wp_attached_file'";
   }
     
   public function setup_mg_media_plus() {
-    add_menu_page(__('Media Library Folders','maxgalleria-media-library'), __('Media Library Folders','maxgalleria-media-library'), 'upload_files', 'media-library-folders', array($this, 'media_library'), 'dashicons-admin-media', 11 );				
-    add_submenu_page(null, __('Check For New Folders','maxgalleria-media-library'), __('Check For New Folders','maxgalleria-media-library'), 'upload_files', 'check-for-new-folders', array($this, 'check_for_new_folders'));
-    add_submenu_page(null, __('Search Library','maxgalleria-media-library'), __('Search Library','maxgalleria-media-library'), 'upload_files', 'search-library', array($this, 'search_library'));
-    add_submenu_page('media-library-folders', __('Check For New Folders','maxgalleria-media-library'), __('Check For New Folders','maxgalleria-media-library'), 'upload_files', 'admin-check-for-new-folders', array($this, 'admin_check_for_new_folders'));
+    add_menu_page(esc_html__('Media Library Folders','maxgalleria-media-library'), esc_html__('Media Library Folders','maxgalleria-media-library'), 'upload_files', 'media-library-folders', array($this, 'media_library'), 'dashicons-admin-media', 11 );				
+    add_submenu_page(null, esc_html__('Check For New Folders','maxgalleria-media-library'), esc_html__('Check For New Folders','maxgalleria-media-library'), 'upload_files', 'check-for-new-folders', array($this, 'check_for_new_folders'));
+    add_submenu_page(null, esc_html__('Search Library','maxgalleria-media-library'), esc_html__('Search Library','maxgalleria-media-library'), 'upload_files', 'search-library', array($this, 'search_library'));
+    add_submenu_page('media-library-folders', esc_html__('Check For New Folders','maxgalleria-media-library'), esc_html__('Check For New Folders','maxgalleria-media-library'), 'upload_files', 'admin-check-for-new-folders', array($this, 'admin_check_for_new_folders'));
 		add_submenu_page(null, '', '', 'manage_options', 'mlp-review-later', array($this, 'mlp_set_review_later'));
 		//add_submenu_page(null, '', '', 'manage_options', 'mlp-review-notice', array($this, 'mlp_set_review_notice_true'));    		
 		add_submenu_page(null, '', '', 'manage_options', 'mlp-feature-notice', array($this, 'mlp_set_feature_notice_true'));    		    
-    add_submenu_page('media-library-folders', __('Upgrade to Pro','maxgalleria-media-library'), __('Upgrade to Pro','maxgalleria-media-library'), 'upload_files', 'mlp-upgrade-to-pro', array($this, 'mlp_upgrade_to_pro'));		
-    add_submenu_page('media-library-folders', __('Regenerate Thumbnails','maxgalleria-media-library'), __('Regenerate Thumbnails','maxgalleria-media-library'), 'upload_files', 'mlp-regenerate-thumbnails', array($this, 'regenerate_interface'));
-    add_submenu_page('media-library-folders', __('Image SEO','maxgalleria-media-library'), __('Image SEO','maxgalleria-media-library'), 'upload_files', 'image-seo', array($this, 'image_seo'));
-    add_submenu_page('media-library-folders', __('Support','maxgalleria-media-library'), __('Support','maxgalleria-media-library'), 'upload_files', 'mlp-support', array($this, 'mlp_support'));
-    add_submenu_page('media-library-folders', __('Settings','maxgalleria-media-library'), __('Settings','maxgalleria-media-library'), 'upload_files', 'mlpp-settings', array($this, 'mlpp_settings'));
+    add_submenu_page('media-library-folders', esc_html__('Upgrade to Pro','maxgalleria-media-library'), esc_html__('Upgrade to Pro','maxgalleria-media-library'), 'upload_files', 'mlp-upgrade-to-pro', array($this, 'mlp_upgrade_to_pro'));		
+    add_submenu_page('media-library-folders', esc_html__('Regenerate Thumbnails','maxgalleria-media-library'), esc_html__('Regenerate Thumbnails','maxgalleria-media-library'), 'upload_files', 'mlp-regenerate-thumbnails', array($this, 'regenerate_interface'));
+    add_submenu_page('media-library-folders', esc_html__('Image SEO','maxgalleria-media-library'), esc_html__('Image SEO','maxgalleria-media-library'), 'upload_files', 'image-seo', array($this, 'image_seo'));
+    add_submenu_page('media-library-folders', esc_html__('Support','maxgalleria-media-library'), esc_html__('Support','maxgalleria-media-library'), 'upload_files', 'mlp-support', array($this, 'mlp_support'));
+    add_submenu_page('media-library-folders', esc_html__('Settings','maxgalleria-media-library'), esc_html__('Settings','maxgalleria-media-library'), 'upload_files', 'mlpp-settings', array($this, 'mlpp_settings'));
 		
-    //add_submenu_page('media-library-folders', __('Scan','maxgalleria-media-library'), __('Scan','maxgalleria-media-library'), 'upload_files', 'scan-attachments', array($this, 'scan_attachments'));
   }
   
 	public function load_textdomain() {
@@ -1004,9 +979,7 @@ and pm.meta_key = '_wp_attached_file'";
 
         
         $features = get_user_meta( $current_user->ID, MAXGALLERIA_MLP_FEATURE_NOTICE, true );
-        //error_log("features $features");
         $review = get_user_meta( $current_user->ID, MAXGALLERIA_MLP_REVIEW_NOTICE, true );
-        //error_log("review $review");
         if( $review !== 'off' || $features !== 'off') {
           if($features === '') {
             $features_date = date('Y-m-d', strtotime("+30 days"));        
@@ -1069,7 +1042,7 @@ and pm.meta_key = '_wp_attached_file'";
 		$ajax_nonce = wp_create_nonce( "media-send-to-editor" );				
 				
 		if(isset($_GET['post'])) {
-			$post_id = $_GET['post'];
+			$post_id = sanitize_textarea_field($_GET['post']);
 		} else {
 			if(isset($post->ID))
 				$post_id = $post->ID;
@@ -1089,25 +1062,14 @@ and pm.meta_key = '_wp_attached_file'";
 		else
 			$show_temp_ad = false;
 
-    ?>      
-<!--      <div id="fb-root"></div>
-      <script>(function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s); js.id = id;
-        js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.4&appId=636262096435499";
-        fjs.parentNode.insertBefore(js, fjs);
-      }(document, 'script', 'facebook-jssdk'));</script>-->
-    <?php
-    
-    $sort_order = get_option( MAXGALLERIA_MEDIA_LIBRARY_SORT_ORDER );    
+    $sort_order = trim(get_option( MAXGALLERIA_MEDIA_LIBRARY_SORT_ORDER ));    
     $move_or_copy = get_option( MAXGALLERIA_MEDIA_LIBRARY_MOVE_OR_COPY );    
 		
     $display_info = get_user_meta( $current_user->ID, MAXGALLERIA_MLP_DISPLAY_INFO, true );
     //$disable_ft = get_user_meta( $current_user->ID, MAXGALLERIA_MLP_DISABLE_FT, true );
 		        
     if ((isset($_GET['media-folder'])) && (strlen(trim($_GET['media-folder'])) > 0)) {
-      $current_folder_id = trim(stripslashes(strip_tags($_GET['media-folder'])));
+      $current_folder_id = trim(sanitize_text_field($_GET['media-folder']));
       if(!is_numeric($current_folder_id)) {
         $current_folder = get_option(MAXGALLERIA_MEDIA_LIBRARY_UPLOAD_FOLDER_NAME, "uploads");      
         $current_folder_id = get_option(MAXGALLERIA_MEDIA_LIBRARY_UPLOAD_FOLDER_ID );        
@@ -1138,7 +1100,6 @@ and pm.meta_key = '_wp_attached_file'";
 				            
     ?>
 
-
       <div id="wp-media-grid" class="wrap">                
         <!--empty h2 for where WP notices will appear--> 
 				<h1></h1>
@@ -1146,21 +1107,21 @@ and pm.meta_key = '_wp_attached_file'";
             
 				<div id="mgmlp-header">		
 					<div id='mgmlp-title-area'>
-          <h2 class='mgmlp-title'><?php _e('Media Library Folders', 'maxgalleria-media-library' ); ?> </h2>    
-					<a id="pro-btn" href="<?php echo UPGRADE_TO_PRO_LINK; ?>" target="_blank">Get MLF Pro</a>
+          <h2 class='mgmlp-title'><?php esc_html_e('Media Library Folders', 'maxgalleria-media-library' ); ?> </h2>    
+					<a id="pro-btn" href="<?php echo esc_url(UPGRADE_TO_PRO_LINK) ?>" target="_blank">Get MLF Pro</a>
 
 					</div> <!-- mgmlp-title-area -->
 					<div id="new-top-promo">
-						<a id="mf-top-logo" target="_blank" href="http://maxfoundry.com"><img alt="maxfoundry logo" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/mf-logo.png" width="140" height="25" ></a>
-						<p class="center-text"><?php _e('Makers of', 'maxgalleria-media-library' ); ?> <a target="_blank"  href="http://maxbuttons.com/">MaxButtons</a>, <a target="_blank" href="http://maxbuttons.com/product-category/button-packs/">WordPress Buttons</a> <?php _e('and', 'maxgalleria-media-library' ); ?> <a target="_blank" href="http://maxgalleria.com/">MaxGalleria</a></p>						
-				    <p class="center-text-no-ital"><?php _e('Click here to', 'maxgalleria-media-library' ); ?> <a href="<?php echo MLF_TS_URL; ?>" target="_blank"><?php _e('Fix Common Problems', 'maxgalleria-media-library'); ?></a></p>
-						<p class="center-text-no-ital"><?php _e('Need help? Click here for', 'maxgalleria-media-library' ); ?> <a href="https://wordpress.org/support/plugin/media-library-plus" target="_blank"><?php _e('Awesome Support!', 'maxgalleria-media-library' ); ?></a></p>
-						<p class="center-text-no-ital"><?php _e('Or Email Us at', 'maxgalleria-media-library' ); ?> <a href="mailto:support@maxfoundry.com">support@maxfoundry.com</a></p>
+						<a id="mf-top-logo" target="_blank" href="http://maxfoundry.com"><img alt="maxfoundry logo" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . '/images/mf-logo.png') ?>" width="140" height="25" ></a>
+						<p class="center-text"><?php esc_html_e('Makers of', 'maxgalleria-media-library' ); ?> <a target="_blank"  href="http://maxbuttons.com/">MaxButtons</a>, <a target="_blank" href="http://maxbuttons.com/product-category/button-packs/">WordPress Buttons</a> <?php esc_html_e('and', 'maxgalleria-media-library' ); ?> <a target="_blank" href="http://maxgalleria.com/">MaxGalleria</a></p>						
+				    <p class="center-text-no-ital"><?php esc_html_e('Click here to', 'maxgalleria-media-library' ); ?> <a href="<?php echo esc_url(MLF_TS_URL) ?>" target="_blank"><?php esc_html_e('Fix Common Problems', 'maxgalleria-media-library'); ?></a></p>
+						<p class="center-text-no-ital"><?php esc_html_e('Need help? Click here for', 'maxgalleria-media-library' ); ?> <a href="https://wordpress.org/support/plugin/media-library-plus" target="_blank"><?php esc_html_e('Awesome Support!', 'maxgalleria-media-library' ); ?></a></p>
+						<p class="center-text-no-ital"><?php esc_html_e('Or Email Us at', 'maxgalleria-media-library' ); ?> <a href="mailto:support@maxfoundry.com">support@maxfoundry.com</a></p>
 					</div>
 					
 				</div><!--mgmlp-header-->
         <div class="mlf-clearfix"></div>  
-        <!--<p id='mlp-more-info'><a href='http://maxgalleria.com/media-library-plus/' target="_blank"><?php _e('Click here to learn about the Media Library Folders Pro', 'maxgalleria-media-library' ); ?></a></p>-->
+        <!--<p id='mlp-more-info'><a href='http://maxgalleria.com/media-library-plus/' target="_blank"><?php esc_html_e('Click here to learn about the Media Library Folders Pro', 'maxgalleria-media-library' ); ?></a></p>-->
                                       
         <!--<div class="mlf-clearfix"></div>-->
 				          
@@ -1168,14 +1129,14 @@ and pm.meta_key = '_wp_attached_file'";
 						
 				  <div id="scan-results"></div>				
           <noscript>
-            <p><?php _e('Media Library Folders has detected that Javascript has been turned off in this browser. It is necessary for Javascript to be running in order for Media Library Folders to function.','maxgalleria-media-library'); ?></p>
+            <p><?php esc_html_e('Media Library Folders has detected that Javascript has been turned off in this browser. It is necessary for Javascript to be running in order for Media Library Folders to function.','maxgalleria-media-library'); ?></p>
           </noscript>
 						
 					<?php 
 																									
 						$phpversion = phpversion();		
-						if($phpversion < '7.2')		
-							echo "<br><div>" . __('Current PHP version, ','maxgalleria-media-library') . $phpversion . __(', is outdated. Please upgrade to version 7.2.','maxgalleria-media-library') . "</div>";
+						if($phpversion < '7.4')		
+							echo wp_kses_post("<br><div>" . __('Current PHP version, ','maxgalleria-media-library') . $phpversion . __(', is outdated. Please upgrade to version 7.4.','maxgalleria-media-library') . "</div>");
 										
             $folder_location = $this->get_folder_path($current_folder_id);
 
@@ -1184,7 +1145,7 @@ and pm.meta_key = '_wp_attached_file'";
 
             $folder_count = count($parents);
             $folder_counter = 0;        
-            $current_folder_string = site_url() . "/wp-content";
+            $current_folder_string = site_url() . "/" . MLF_WP_CONTENT_FOLDER_NAME;
             foreach( $parents as $key => $obj) { 
               $folder_counter++;
               if($folder_counter === $folder_count)
@@ -1194,7 +1155,7 @@ and pm.meta_key = '_wp_attached_file'";
               $current_folder_string .= '/' . $obj['name'];
             }
 					
-					echo "<h3 id='mgmlp-breadcrumbs'>" . __('Location:','maxgalleria-media-library') . " $folders_path</h3>"; 
+					echo wp_kses_post("<h3 id='mgmlp-breadcrumbs'>" . __('Location:','maxgalleria-media-library') . " $folders_path</h3>"); 
 					
 					?>
 						
@@ -1206,14 +1167,10 @@ and pm.meta_key = '_wp_attached_file'";
 							
 							<div id="above-toolbar">
 
-								<?php
+								<a id="add-new_attachment" help="<?php esc_html_e('Upload new files.','maxgalleria-media-library') ?>" class="gray-blue-link" href="javascript:slideonlyone('add-new-area');"> <?php esc_html_e('Add File','maxgalleria-media-library') ?></a>
 
-								echo '  <a id="add-new_attachment" help="' . __('Upload new files.','maxgalleria-media-library') . '" class="gray-blue-link" href="javascript:slideonlyone(\'add-new-area\');">' . __('Add File','maxgalleria-media-library') . '</a>' . PHP_EOL;
-
-								echo '  <a id="add-new-folder" help="' . __('Create a new folder. Type in a folder name (do not use spaces, single or double quote marks) and click Create Folder.','maxgalleria-media-library') . '"  class="gray-blue-link" href="javascript:slideonlyone(\'new-folder-area\');">' .  __('Add Folder','maxgalleria-media-library') . '</a>' . PHP_EOL;
-
-								?>
-
+								<a id="add-new-folder" help="<?php esc_html_e('Create a new folder. Type in a folder name (do not use spaces, single or double quote marks) and click Create Folder.','maxgalleria-media-library') ?>"  class="gray-blue-link" href="javascript:slideonlyone('new-folder-area');"><?php esc_html_e('Add Folder','maxgalleria-media-library') ?></a>
+                
 							</div>
 							
 							<div id="ft-panel">
@@ -1222,12 +1179,12 @@ and pm.meta_key = '_wp_attached_file'";
 								</ul>
 								<?php if($display_info != 'off') { ?>
 								<div id="mlf-info">
-									<a id="mlf-info-close" title="Click to hide text">X</a>
-									<p><?php _e('When moving/copying to a new folder place your pointer, not the image, on the folder where you want the file(s) to go.','maxgalleria-media-library')?></p>
-									<p><?php _e('To drag multiple images, check the box under the files you want to move and then drag one of the images to the desired folder.','maxgalleria-media-library')?></p>
-									<p><?php _e('To move/copy to a folder nested under the top level folder click the triangle to the left of the folder to show the nested folder that is your target.','maxgalleria-media-library')?></p>		
-									<p><?php _e('To delete a folder, right click on the folder and a popup menu will appear. Click on the option, "Delete this folder?" If the folder is empty, it will be deleted.','maxgalleria-media-library')?></p>
-									<p><?php _e('To hide a folder and all its sub folders and files, right click on a folder, On the popup menu that appears, click "Hide this folder?" and those folders and files will be removed from the Media Library, but not from the server. <span class="mlp-warning">Caution: only hide a folder when you want its contents removed from the media library database.</span>','maxgalleria-media-library')?></p>
+									<a id="mlf-info-close" title="<?php esc_html_e('Click to hide text','maxgalleria-media-library')?>">X</a>
+									<p><?php esc_html_e('When moving/copying to a new folder place your pointer, not the image, on the folder where you want the file(s) to go.','maxgalleria-media-library')?></p>
+									<p><?php esc_html_e('To drag multiple images, check the box under the files you want to move and then drag one of the images to the desired folder.','maxgalleria-media-library')?></p>
+									<p><?php esc_html_e('To move/copy to a folder nested under the top level folder click the triangle to the left of the folder to show the nested folder that is your target.','maxgalleria-media-library')?></p>		
+									<p><?php esc_html_e('To delete a folder, right click on the folder and a popup menu will appear. Click on the option, "Delete this folder?" If the folder is empty, it will be deleted.','maxgalleria-media-library')?></p>
+									<p><?php esc_html_e('To hide a folder and all its sub folders and files, right click on a folder, On the popup menu that appears, click "Hide this folder?" and those folders and files will be removed from the Media Library, but not from the server. <span class="mlp-warning">Caution: only hide a folder when you want its contents removed from the media library database.</span>','maxgalleria-media-library')?></p>
 								</div>
 								<?php } ?>
 							</div>				
@@ -1236,147 +1193,141 @@ and pm.meta_key = '_wp_attached_file'";
             <div id="alwrap">
               <div style="display:none" id="ajaxloader"></div>
             </div>
-            <?php 
-            
-            echo '<div id="mgmlp-toolbar">' . PHP_EOL;
+            <div id="mgmlp-toolbar">
+            <?php             
 																		
             $move_or_copy = ($move_or_copy === 'on') ? true : false;
-						echo '  <div class="onoffswitch" help="' . __('Move/Copy Toggle. Move or copy selected files to a different folder.<br> When move is selected, images links in posts and pages will be updated.<br> <span class=\'mlp-warning\'>Images IDs used in Jetpack Gallery shortcodes will not be updated.</span>','maxgalleria-media-library') . '">' . PHP_EOL;
-						//echo '    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="move-copy-switch" >' . PHP_EOL;
-						echo '    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="move-copy-switch" ' . checked($move_or_copy, true, false)  . '>' . PHP_EOL;
-						echo '    <label class="onoffswitch-label" for="move-copy-switch">' . PHP_EOL;
-						echo '      <span class="onoffswitch-inner"></span>' . PHP_EOL;
-						echo '      <span class="onoffswitch-switch"></span>' . PHP_EOL;
-						echo '    </label>' . PHP_EOL;
-						echo '  </div>' . PHP_EOL;
-						            
-						echo '  <a id="rename-file" help="' . __('Rename a file; select only one file. Folders cannot be renamed. Type in a new name with no spaces and without the extension and click Rename.','maxgalleria-media-library') . '" class="gray-blue-link" href="javascript:slideonlyone(\'rename-area\');">' .  __('Rename','maxgalleria-media-library') . '</a>' . PHP_EOL;
+            ?>
+            <div class="onoffswitch" help=" <?php esc_html_e('Move/Copy Toggle. Move or copy selected files to a different folder.<br> When move is selected, images links in posts and pages will be updated.<br> <span class=\'mlp-warning\'>Images IDs used in Jetpack Gallery shortcodes will not be updated.</span>','maxgalleria-media-library') ?>">
+              <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="move-copy-switch" <?php esc_attr(checked($move_or_copy, true)) ?>>
+              <label class="onoffswitch-label" for="move-copy-switch">
+              <span class="onoffswitch-inner"></span>
+              <span class="onoffswitch-switch"></span>
+              </label>
+            </div>
+              
+						<a id="rename-file" help="<?php esc_html_e('Rename a file; select only one file. Folders cannot be renamed. Type in a new name with no spaces and without the extension and click Rename.','maxgalleria-media-library') ?>" class="gray-blue-link" href="javascript:slideonlyone('rename-area');"><?php esc_html_e('Rename','maxgalleria-media-library') ?></a>
             														
-            echo '  <a id="delete-media" help="' . __('Delete selected files.','maxgalleria-media-library') . '" class="gray-blue-link" >' .  __('Delete','maxgalleria-media-library') . '</a>' . PHP_EOL;
+            <a id="delete-media" help="<?php esc_html_e('Delete selected files.','maxgalleria-media-library') ?>" class="gray-blue-link" ><?php esc_html_e('Delete','maxgalleria-media-library') ?></a>
 						
-						echo '  <a id="select-media" help="' . __('Select or unselect all files in the folder.','maxgalleria-media-library') . '" class="gray-blue-link" >' .  __('Select/Unselect All','maxgalleria-media-library') . '</a>' . PHP_EOL;
+						<a id="select-media" help="<?php esc_html_e('Select or unselect all files in the folder.','maxgalleria-media-library') ?>" class="gray-blue-link" ><?php esc_html_e('Select/Unselect All','maxgalleria-media-library') ?></a>
                         
-            echo '  <div id="sort-wrap"><select id="mgmlp-sort-order">' . PHP_EOL;
-            echo '    <option value="1" ' . ($sort_order === '1' ? 'selected="selected"' : ''  ). '>' . __('Sort by Title','maxgalleria-media-library') . '</option>' . PHP_EOL;
-            echo '    <option value="0" ' . ($sort_order === '0' ? 'selected="selected"' : ''  ). '>' . __('Sort by Date','maxgalleria-media-library') . '</option>' . PHP_EOL;
-            echo '  </select></div>' . PHP_EOL;
+            <div id="sort-wrap">
+              <select id="mgmlp-sort-order">
+                <?php
+                $title_selected = '';
+                $date_selected = '';
+                if($sort_order == '1')
+                  $title_selected = 'selected="selected"';
+                else
+                  $date_selected = 'selected="selected"';
+                ?>
+                <option value="1" <?php echo esc_attr($title_selected) ?>><?php esc_html_e('Sort by Title','maxgalleria-media-library') ?></option>
+                <option value="0" <?php echo esc_attr($date_selected) ?>><?php esc_html_e('Sort by Date','maxgalleria-media-library') ?></option>
+              </select>
+            </div>
                                     
-						echo '  <span id="mlfp-search-block"><span id="search-wrap">' . PHP_EOL;
-            echo '      <input type="search" placeholder="' . __('Search','maxgalleria-media-library') . '" id="mgmlp-media-search-input" class="search gray-blue-link">' . PHP_EOL;                                    						
-            echo '    </span>' . PHP_EOL;           
-            echo '    <a id="mlfp-media-search" help="' . __('Performs a seach for files and folders','maxgalleria-media-library') . '" class="gray-blue-link" >' .  __('Search','maxgalleria-media-library') . '</a>' . PHP_EOL;            
-            echo '  </span>' . PHP_EOL;           
-            
-						//echo '  <a id="mgmlp-search-media" help="' . __('Execute a search of media library files and folders','maxgalleria-media-library') . '" class="gray-blue-link" >' .  __('Search','maxgalleria-media-library') . '</a>' . PHP_EOL;            
-            						
-						echo '  <a id="sync-media" help="' . __('Sync the contents of the current folder with the server','maxgalleria-media-library') . '" class="gray-blue-link" >' .  __('Sync','maxgalleria-media-library') . '</a>' . PHP_EOL;            
-												
-            //echo '  <div id="mgmlp-toolbar">' . PHP_EOL;
+						<span id="mlfp-search-block">
+              <span id="search-wrap">
+                <input type="search" placeholder="<?php esc_html_e('Search','maxgalleria-media-library') ?>" id="mgmlp-media-search-input" class="search gray-blue-link">
+              </span>      
+              <a id="mlfp-media-search" help="<?php esc_html_e('Performs a seach for files and folders','maxgalleria-media-library') ?>" class="gray-blue-link" ><?php esc_html_e('Search','maxgalleria-media-library') ?></a>
+            </span>         
+                        						
+						<a id="sync-media" help="<?php esc_html_e('Sync the contents of the current folder with the server','maxgalleria-media-library') ?>" class="gray-blue-link" ><?php esc_html_e('Sync','maxgalleria-media-library') ?></a>												
 							
-            echo '  <a id="mgmlp-regen-thumbnails" help="' . __('Regenerates the thumbnails of selected images','maxgalleria-media-library') . '" class="gray-blue-link" >' .  __('Regenerate Thumbnails','maxgalleria-media-library') . '</a>' . PHP_EOL;            						
+            <a id="mgmlp-regen-thumbnails" help="<?php esc_html_e('Regenerates the thumbnails of selected images','maxgalleria-media-library') ?>" class="gray-blue-link" ><?php esc_html_e('Regenerate Thumbnails','maxgalleria-media-library') ?></a>
 						
-						if(class_exists('MaxGalleria')) {
-              echo '  <a id="add-images-to-gallery" help="' . __('Add images to an existing MaxGalleria gallery. Folders can not be added to a gallery. Images already in the gallery will not be added. ','maxgalleria-media-library') . '" class="gray-blue-link" href="javascript:slideonlyone(\'gallery-area\');">' .  __('Add to MaxGalleria Gallery','maxgalleria-media-library') . '</a>' . PHP_EOL;
-						}
+						<?php if(class_exists('MaxGalleria')) { ?>
+              <a id="add-images-to-gallery" help="<?php esc_html_e('Add images to an existing MaxGalleria gallery. Folders can not be added to a gallery. Images already in the gallery will not be added. ','maxgalleria-media-library') ?>" class="gray-blue-link" href="javascript:slideonlyone('gallery-area');"><?php esc_html_e('Add to MaxGalleria Gallery','maxgalleria-media-library') ?></a>
+            <?php } ?>
 																				
-							$filter_output = "";
-						
-		          echo  apply_filters(MGMLP_FILTER_ADD_TOOLBAR_BUTTONS, $filter_output);
-			
-													
-							echo '  </div>' . PHP_EOL;
-						
+            <?php						            
+							$filter_output = "";						
+		          echo apply_filters(MGMLP_FILTER_ADD_TOOLBAR_BUTTONS, $filter_output);              
+            ?>  
+																
+						</div>
+						            
+            <div id="folder-message"></div>
             
-            echo '  <div id="folder-message">' . PHP_EOL;
-            echo '  </div>' . PHP_EOL;
-            
+            <?php						            
 						$image_seo = get_option(MAXGALLERIA_MEDIA_LIBRARY_IMAGE_SEO, 'off');
 						if($image_seo === 'on') {
 							$seo_file_title = get_option(MAXGALLERIA_MEDIA_LIBRARY_TITLE_DEFAULT);
 							$seo_alt_text = get_option(MAXGALLERIA_MEDIA_LIBRARY_ATL_DEFAULT);
 						}
-            echo '<div id="add-new-area" class="input-area">' . PHP_EOL;
-            echo '  <div id="dragandrophandler">' . PHP_EOL;
-            echo '    <div>' . __('Drag & Drop Files Here','maxgalleria-media-library') . '</div>' . PHP_EOL;
-            echo '    <div id="upload-text">' . __('or select a file or image to upload:','maxgalleria-media-library') . '</div>' . PHP_EOL;
-            echo '    <input type="file" name="fileToUpload" id="fileToUpload">' . PHP_EOL;  
-            echo '    <input type="hidden" name="folder_id" id="folder_id" value="' . $current_folder_id . '">' . PHP_EOL;
-            echo '    <input type="button" value="' . __('Upload Image','maxgalleria-media-library') . '" id="mgmlp_ajax_upload" name="submit_image">' . PHP_EOL;
-            echo '  </div>' . PHP_EOL;
-						if($image_seo === 'on') {
-						  echo '  <label class="mlp-seo-label" for="mlp_title_text">' . __('Image Title Text:','maxgalleria-media-library') . '&nbsp;</label><input class="seo-fields" type="text" name="mlp_title_text" id="mlp_title_text" value="' . $seo_file_title .'">' . PHP_EOL;
-						  echo '  <label class="mlp-seo-label" for="mlp_alt_text">' . __('Image ALT Text:','maxgalleria-media-library') . '&nbsp;</label><input class="seo-fields" type="text" name="mlp_alt_text" id="mlp_alt_text" value="' . $seo_alt_text . '">' . PHP_EOL;
-						}
-            echo '</div>' . PHP_EOL;
-            echo '<div class="mlf-clearfix"></div>' . PHP_EOL;
-            
-            echo '<div id="rename-area" class="input-area">' . PHP_EOL;
-            echo '  <div id="rename-box">' . PHP_EOL;
-            echo __('File Name: ','maxgalleria-media-library') . '<input type="text" name="new-file-name" id="new-file-name", value="" />' . PHP_EOL;
-            echo '<div class="btn-wrap"><a id="mgmlp-rename-file" class="gray-blue-link" >'. __('Rename','maxgalleria-media-library') .'</a></div>' . PHP_EOL;
-            echo '  </div>' . PHP_EOL;
-            echo '</div>' . PHP_EOL;
-            echo '<div class="mlf-clearfix"></div>' . PHP_EOL;
-												
-            //echo '  <div id="rename-box">' . PHP_EOL;
-            //echo __('File Name: ','maxgalleria-media-library') . '<input type="text" name="new-file-name" id="new-file-name", value="" />' . PHP_EOL;
-            //echo '<div class="btn-wrap"><a id="mgmlp-rename-file" class="gray-blue-link" >'. __('Rename','maxgalleria-media-library') .'</a></div>' . PHP_EOL;
-            //echo '  </div>' . PHP_EOL;
-            echo '</div>' . PHP_EOL;
-            echo '<div class="mlf-clearfix"></div>' . PHP_EOL;
-						                                               
-						if(class_exists('MaxGalleria')) {
-						
-							echo '<div id="gallery-area" class="input-area">' . PHP_EOL;
-							echo '  <div id="gallery-box">' . PHP_EOL;
-							$sql = "select ID, post_title 
-	from $wpdb->prefix" . "posts 
-	LEFT JOIN $wpdb->prefix" . "postmeta ON($wpdb->prefix" . "posts.ID = $wpdb->prefix" . "postmeta.post_id)
-	where post_type = 'maxgallery' and post_status = 'publish'
-	and $wpdb->prefix" . "postmeta.meta_key = 'maxgallery_type'
-	and $wpdb->prefix" . "postmeta.meta_value = 'image'
-	order by LOWER(post_name)";
-							//echo $sql;
-							$gallery_list = "";
-							$rows = $wpdb->get_results($sql);
-
-							if($rows) {
-								foreach ($rows as $row) {
-									$gallery_list .='<option value="' . $row->ID . '">' . $row->post_title . '</option>' . PHP_EOL;
-								}
-							}
-							echo '    <select id="gallery-select">' . PHP_EOL;
-							echo        $gallery_list;
-							echo '    </select>' . PHP_EOL;
-							echo '<div class="btn-wrap"><a id="add-to-gallery" class="gray-blue-link" >'. __('Add Images','maxgalleria') .'</a></div>' . PHP_EOL;
-
-							echo '  </div>' . PHP_EOL;
-							echo '</div>' . PHP_EOL;
-							echo '<div class="mlf-clearfix"></div>' . PHP_EOL;            
-						}
-                        						
-            echo '<div id="new-folder-area" class="input-area">' . PHP_EOL;
-            echo '  <div id="new-folder-box">' . PHP_EOL;
-            echo '<input type="hidden" id="current-folder-id" value="' . $current_folder_id . '" />' . PHP_EOL;
-            echo '<input type="hidden" id="previous-folder-id" value="' . $current_folder_id . '" />' . PHP_EOL;
-            echo __('Folder Name: ','maxgalleria-media-library') . '<input type="text" name="new-folder-name" id="new-folder-name", value="" />' . PHP_EOL;
-            echo '<div class="btn-wrap"><a id="mgmlp-create-new-folder" class="gray-blue-link" >'. __('Create Folder','maxgalleria-media-library') .'</a></div>' . PHP_EOL;
-            echo '  </div>' . PHP_EOL;                        
-            echo '</div>' . PHP_EOL;
-            echo '<div class="mlf-clearfix"></div>' . PHP_EOL;
-												
-						$filter_output = "";
-						echo  apply_filters(MGMLP_FILTER_ADD_TOOLBAR_AREAS, $filter_output);													
-                        
-            echo '<div id="mgmlp-file-container">' . PHP_EOL;
-              $this->display_folder_contents ($current_folder_id);
-            echo '</div>' . PHP_EOL;
-                        
             ?>
+            <div id="add-new-area" class="input-area">
+              <div id="dragandrophandler">
+                <div><?php esc_html_e('Drag & Drop Files Here','maxgalleria-media-library') ?></div>
+                  <div id="upload-text"><?php esc_html_e('or select a file or image to upload:','maxgalleria-media-library') ?></div>
+                  <input type="file" name="fileToUpload" id="fileToUpload">
+                  <input type="hidden" name="folder_id" id="folder_id" value="<?php echo esc_attr($current_folder_id) ?>">
+                  <input type="button" value="<?php esc_html_e('Upload Image','maxgalleria-media-library') ?>" id="mgmlp_ajax_upload" name="submit_image">
+              </div>
+						<?php if($image_seo === 'on') { ?>
+              <label class="mlp-seo-label" for="mlp_title_text"><?php esc_html_e('Image Title Text:','maxgalleria-media-library') ?>&nbsp;</label><input class="seo-fields" type="text" name="mlp_title_text" id="mlp_title_text" value="<?php echo esc_attr($seo_file_title) ?>">
+              <label class="mlp-seo-label" for="mlp_alt_text"><?php esc_html_e('Image ALT Text:','maxgalleria-media-library') ?>&nbsp;</label><input class="seo-fields" type="text" name="mlp_alt_text" id="mlp_alt_text" value="<?php echo esc_attr($seo_alt_text) ?>">
+						<?php } ?>
+            </div>
+            <div class="mlf-clearfix"></div>
+            
+            <div id="rename-area" class="input-area">
+              <div id="rename-box">
+                <?php esc_html_e('File Name: ','maxgalleria-media-library') ?><input type="text" name="new-file-name" id="new-file-name", value="" />
+                <div class="btn-wrap"><a id="mgmlp-rename-file" class="gray-blue-link" ><?php esc_html_e('Rename','maxgalleria-media-library') ?></a></div>
+              </div>
+            </div>
+            <div class="mlf-clearfix"></div>
+            
+          </div>
+          <div class="mlf-clearfix"></div>
+												
+          <?php						            
+            if(class_exists('MaxGalleria')) {
+              $gallery_list = $this->get_maxgalleria_galleries();
+              $allowed_html = array(
+                'option' => array(
+                  'value' => array()
+                )    
+              );              
+            ?>
+            <div id="gallery-area" class="input-area">
+              <div id="gallery-box">
+
+              <select id="gallery-select">
+                <?php echo wp_kses($gallery_list, $allowed_html) ?>
+              </select>
+              <div class="btn-wrap"><a id="add-to-gallery" class="gray-blue-link" ><?php esc_html_e('Add Images','maxgalleria') ?></a></div>
+
+              </div>
+            </div>
+            <div class="mlf-clearfix"></div>
+          <?php } ?>
+            
+            <div id="new-folder-area" class="input-area">
+              <div id="new-folder-box">
+                <input type="hidden" id="current-folder-id" value="<?php echo esc_attr($current_folder_id) ?>" />
+                <input type="hidden" id="previous-folder-id" value="<?php echo esc_attr($current_folder_id) ?>" />
+                <?php esc_html_e('Folder Name: ','maxgalleria-media-library') ?><input type="text" name="new-folder-name" id="new-folder-name" value="" />
+                <div class="btn-wrap"><a id="mgmlp-create-new-folder" class="gray-blue-link" ><?php esc_html_e('Create Folder','maxgalleria-media-library') ?></a></div>
+              </div>
+            </div>
+            <div class="mlf-clearfix"></div>
+												
+            <?php						            												
+						$filter_output = "";
+						echo  apply_filters(MGMLP_FILTER_ADD_TOOLBAR_AREAS, $filter_output);	
+            ?>
+                        
+            <div id="mgmlp-file-container">
+              <?php $this->display_folder_contents ($current_folder_id); ?>
+            </div>
+                        
             <script>
 							
 						window.onerror = function(msg, url, linenumber) {
-							//jQuery("#folder-message").html('Javascript error : ' + msg + ' URL: '+ url + ' Line Number: ' + linenumber);
 							jQuery("#folder-message").html('Javascript error : ' + msg );
 							return true;
 						}
@@ -1415,10 +1366,6 @@ and pm.meta_key = '_wp_attached_file'";
 								jQuery("#folder-message").html('');
 								var folder = jQuery(this).attr('folder');
 
-								//var home_url = "< ?php echo site_url(); ?>"; 
-
-								//window.location.href = home_url + '/wp-admin/admin.php?page=media-library-folders&' + 'media-folder=' + folder;
-
 								jQuery.ajax({
 									type: "POST",
 									async: true,
@@ -1426,21 +1373,12 @@ and pm.meta_key = '_wp_attached_file'";
 									url : mgmlp_ajax.ajaxurl,
 									dataType: "html",
 									success: function (data) {
-										jQuery("#ajaxloader").hide();          
-										//jQuery("#mgmlp-tb-container").html(data);
 										jQuery("#mgmlp-file-container").html(data);						
-		//							  console.log(window.hide_checkboxes);									
 										jQuery("#previous-folder-id").val(jQuery("#current-folder-id").val());
 										jQuery("#current-folder-id").val(folder);
 										console.log('current ' + folder);
 										console.log('previous '+ jQuery("#previous-folder-id").val());
-										//if(window.hide_checkboxes) {
-										//	jQuery("div#mgmlp-tb-container input.mgmlp-media").hide();
-										//	jQuery("a.tb-media-attachment").css("cursor", "pointer");
-										//} else {
-										//	jQuery("div#mgmlp-tb-container input.mgmlp-media").show();
-										//	jQuery("a.tb-media-attachment").css("cursor", "default");
-										//}	
+										jQuery("#ajaxloader").hide();          
 									},
 									error: function (err)
 										{ alert(err.responseText);}
@@ -1449,18 +1387,6 @@ and pm.meta_key = '_wp_attached_file'";
 
 							});
 
-//							jQuery('#mgmlp-media-search-input').keydown(function (e){
-//								if(e.keyCode == 13){
-//
-//									var search_value = jQuery('#mgmlp-media-search-input').val();
-//
-//									var home_url = "<?php echo site_url(); ?>"; 
-//
-//									window.location.href = home_url + '/wp-admin/admin.php?page=search-library&' + 's=' + search_value;
-//
-//								}  
-//							})    
-              
               jQuery('#mgmlp-media-search-input').keydown(function (e){
                 if(e.keyCode == 13){                
                   do_mlfp_search();
@@ -1480,107 +1406,53 @@ and pm.meta_key = '_wp_attached_file'";
               search_value = search_value.trim();
 
               if(search_value.length < 1) {
-                jQuery("#folder-message").html('<?php _e('The search text is empty.', 'maxgalleria-media-library' ); ?>');
+                jQuery("#folder-message").html('<?php esc_html_e('The search text is empty.', 'maxgalleria-media-library' ); ?>');
                 return false;
               } 
               jQuery("#folder-message").html('');
 
-              var home_url = "<?php echo site_url(); ?>"; 
+              var search_url = '<?php echo esc_url_raw(site_url() . '/wp-admin/admin.php?page=search-library&s=') ?>' + search_value;
 
-              window.location.href = home_url + '/wp-admin/admin.php?page=search-library&' + 's=' + search_value;
+              window.location.href = search_url;
 
-            }  
-            
-            
+            }    
             </script>  
 
           </div> <!-- mgmlp-library-container -->
           </div> <!-- mgmlp-outer-container -->
         </div>
           
-          <div class="mlf-clearfix"></div>
-					<?php //if($show_temp_ad) { ?>
-<!--          <div id="mlpp-ad" class="large-12">
-            <div class="mg-promo">
-		        <a id="ad-close-btn">x</a>							
-            <p class="mg-promo-title"><a target="_blank" href="http://maxgalleria.com/shop/category/addons/?utm_source=mlefree&utm_medium=tout&utm_campaign=tout ">Try these terrific MaxGalleria Addons<br>Every Addon for $49 or any single Addon for $39 for 1 site</a></p>
-            <div class="small-6 medium-6 large-6 columns sources">
-            <p class="section-title"><span>Layout Addons</span></p>
-            <div class="row top-margin">
-              <div class="medium-6 large-6 columns addon-item">
-                <a href="http://maxgalleria.com/shop/maxgalleria-image-carousel/?utm_source=mlefree&amp;utm_medium=image-carousel&amp;utm_campaign=image-carousel"><img width="200" height="200" title="MaxGalleria Image Carousel Addon" alt="MaxGalleria Image Carousel Addon" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/maxgalleria-image-carousel-cover.png"></a><h3><a href="http://maxgalleria.com/shop/maxgalleria-image-carousel/?utm_source=mlefree&amp;utm_medium=image-carousel&amp;utm_campaign=image-carousel">Image Carousel</a></h3><p>Turn your galleries into carousels</p>
-              </div>
-              <div class="medium-6 large-6 columns addon-item">
-                <a href="http://maxgalleria.com/shop/maxgalleria-albums/?utm_source=mlefree&amp;utm_medium=albums&amp;utm_campaign=albums"><img width="200" height="200" title="MaxGalleria Albums Addon" alt="MaxGalleria Albums Addon" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/maxgalleria-albums-cover.png"></a><h3><a href="http://maxgalleria.com/shop/maxgalleria-image-carousel/?utm_source=mlefree&amp;utm_medium=albums&amp;utm_campaign=albums">Albums</a></h3><p>Organize your galleries into albums</p>
-              </div>
-            </div>
-            <div class="row top-margin">
-              <div class="medium-6 large-6 columns addon-item">
-                <a href="http://maxgalleria.com/shop/maxgalleria-image-showcase/?utm_source=mlefree&utm_medium=imageshowcase&utm_campaign=imageshowcase"><img width="200" height="200" title="MaxGalleria Image Showcase Addon" alt="MaxGalleria Image Showcase Addon" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/maxgalleria-image-showcase-cover.png"></a><h3><a href="http://maxgalleria.com/shop/maxgalleria-image-showcase/?utm_source=mlefree&utm_medium=imageshowcase&utm_campaign=imageshowcase">Image Showcase</a></h3><p>Showcase image with thumbnails</p>
-              </div>
-              <div class="medium-6 large-6 columns addon-item">
-                <a href="http://maxgalleria.com/shop/maxgalleria-video-showcase/?utm_source=mlefree&utm_medium=videoshowcase&utm_campaign=videoshowcase"><img width="200" height="200" title="" alt="" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/maxgalleria-video-showcase-cover.png"></a><h3><a href="http://maxgalleria.com/shop/maxgalleria-video-showcase/?utm_source=mlefree&utm_medium=videoshowcase&utm_campaign=videoshowcase">Video Showcase</a></h3><p>Showcase video with thumbnails</p>
-              </div>
-            </div>
-            <div class="row top-margin">
-              <div class="medium-6 large-6 columns addon-item">
-                <a href="http://maxgalleria.com/shop/maxgalleria-masonry/?utm_source=mlefree&utm_medium=masonry&utm_campaign=masonry"><img width="200" height="200" title="Maxgalleria Masonry" alt="Maxgalleria Masonry" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/maxgalleria-masonry-cover.png"></a><h3><a href="http://maxgalleria.com/shop/maxgalleria-masonry/?utm_source=mlefree&utm_medium=masonry&utm_campaign=masonry">Masonry</a></h3><p>Display Images in a Masonry Grid</p>
-              </div>
-              <div class="medium-6 large-6 columns addon-item">
-                <a href="http://maxgalleria.com/shop/maxgalleria-image-slider/?utm_source=mlefree&utm_medium=imageslider&utm_campaign=imageslider"><img width="200" height="200" title="MaxGalleria Image Slider Addon" alt="MaxGalleria Image Slider Addon" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/maxgalleria-image-slider-cover.png"></a><h3><a href="http://maxgalleria.com/shop/maxgalleria-image-slider/?utm_source=mlefree&utm_medium=imageslider&utm_campaign=imageslider">Image Slider</a></h3><p>Turn your galleries into sliders</p>
-              </div>
-            </div>
-           </div>
-           <div class="small-6 medium-6 large-6 columns sources">
-            <p class="section-title"><span>Media Sources</span></p>
-            <div class="row top-margin">
-              <div class="medium-6 large-6 columns addon-item">
-                <a href="http://maxgalleria.com/shop/maxgalleria-facebook/?utm_source=mlefree&utm_medium=facebook&utm_campaign=facebook"><img width="200" height="200" title="MaxGalleria Facebook Addon" alt="MaxGalleria Facebook Addon" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/maxgalleria-facebook-cover.png"></a><h3><a href="http://maxgalleria.com/shop/maxgalleria-facebook/?utm_source=mlefree&utm_medium=facebook&utm_campaign=facebook">Facebook</a></h3><p>Add Facebook photos to galleries</p>
-              </div>
-              <div class="medium-6 large-6 columns addon-item">
-                <a href="http://maxgalleria.com/shop/maxgalleria-slick-for-wordpress/?utm_source=mlefree&utm_medium=slick&utm_campaign=slick"><img width="200" height="200" title="Slick for WordPress" alt="Slick for WordPress" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/maxgalleria-slick-for-wordpress-cover.png"></a><h3><a href="http://maxgalleria.com/shop/maxgalleria-slick-for-wordpress/?utm_source=mlefree&utm_medium=slick&utm_campaign=slick">Slick for WordPress</a></h3><p>The Last Carousel You'll ever need!</p>
-              </div>
-            </div>
-            <div class="row top-margin">
-              <div class="medium-6 large-6 columns addon-item">
-                <a href="http://maxgalleria.com/shop/maxgalleria-instagram/?utm_source=mlefree&utm_medium=instagram&utm_campaign=instagram"><img width="200" height="200" title="MaxGalleria Instagram Addon" alt="MaxGalleria Instagram Addon" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/maxgalleria-instagram-cover.png"></a><h3><a href="http://maxgalleria.com/shop/maxgalleria-instagram/?utm_source=mlefree&utm_medium=instagram&utm_campaign=instagram">Instagram</a></h3><p>Add Instagram images to galleries</p>
-              </div>
-              <div class="medium-6 large-6 columns addon-item">
-                <a href="http://maxgalleria.com/shop/maxgalleria-flickr/?utm_source=mlefree&utm_medium=flickr&utm_campaign=flickr"><img width="200" height="200" title="MaxGalleria Flickr Addon" alt="MaxGalleria Flickr Addon" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/maxgalleria-flickr-cover.png"></a><h3><a href="http://maxgalleria.com/shop/maxgalleria-flickr/?utm_source=mlefree&utm_medium=flickr&utm_campaign=flickr">Flickr</a></h3><p>Pull In Images from your Flickr stream</p>
-              </div>
-            </div>
-            <div class="row top-margin">
-              <div class="medium-6 large-6 columns addon-item">
-                <a href="http://maxgalleria.com/shop/maxgalleria-vimeo/?utm_source=mlefree&utm_medium=vimeo&utm_campaign=vimeo"><img width="200" height="200" title="MaxGalleria Vimeo Addon" alt="MaxGalleria Vimeo Addon" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/maxgalleria-vimeo-cover.png"></a><h3><a href="http://maxgalleria.com/shop/maxgalleria-vimeo/?utm_source=mlefree&utm_medium=vimeo&utm_campaign=vimeo">Vimeo</a></h3><p>Use Vimeo videos in your galleries</p>
-              </div>
-            </div>
-           </div>
-           </div>
-          </div> large-12
-        <div class="mlf-clearfix"></div>          -->
-			<?php // } ?>
+        <div class="mlf-clearfix"></div>
       </div>
-			<script>
-				//jQuery("#ad-close-btn").click(function() {
-        jQuery(document).on("click", "#ad-close-btn", function () {
-					jQuery.ajax({
-						type: "POST",
-						async: true,
-						data: { action: "mlpp_hide_template_ad",  nonce: "<?php echo wp_create_nonce(MAXGALLERIA_MEDIA_LIBRARY_NONCE); ?>" },
-						url: "<?php echo admin_url('admin-ajax.php') ?>",
-						dataType: "html",
-						success: function (data) {
-							jQuery("#mlpp-ad").hide();          
-						},
-						error: function (err)
-							{ alert(err.responseText);}
-					});
-
-				});		
-			</script>
     <?php
   }
+  
+  public function get_maxgalleria_galleries() {
+    
+    global $wpdb;
+    
+    $sql = "select ID, post_title 
+	from {$wpdb->prefix}posts 
+  LEFT JOIN {$wpdb->prefix}postmeta ON({$wpdb->prefix}posts.ID = {$wpdb->prefix}postmeta.post_id)
+	where post_type = 'maxgallery' and post_status = 'publish'
+  and {$wpdb->prefix}postmeta.meta_key = 'maxgallery_type'
+	and {$wpdb->prefix}postmeta.meta_value = 'image'
+	order by LOWER(post_name)";
+  
+    $gallery_list = "";
+    $rows = $wpdb->get_results($sql);
+
+    if($rows) {
+      foreach ($rows as $row) {
+        $gallery_list .='<option value="' . esc_attr($row->ID) . '">' . esc_html($row->post_title) . '</option>' . PHP_EOL;
+      }
+    }
+    return $gallery_list;
+  }  
+  
   public function display_folder_contents ($current_folder_id, $image_link = true, $folders_path = '', $echo = true) {
+    
+    error_log("display_folder_contents");
 				
     $folders_found = false;
     $images_found = false;
@@ -1604,25 +1476,18 @@ and pm.meta_key = '_wp_attached_file'";
 		else				
 			$image_link = "0";
 								
+    // build the Javascript code to load the folder contents
 		$output .= '<script type="text/javascript">' . PHP_EOL;
     $output .= '	jQuery(document).ready(function() {' . PHP_EOL;		
     $output .= '	var mif_visible = (jQuery("#mgmlp-media-search-input").is(":visible")) ? false : true;' . PHP_EOL;		
 		$output .= '    jQuery.ajax({' . PHP_EOL;
 		$output .= '      type: "POST",' . PHP_EOL;
 		$output .= '      async: true,' . PHP_EOL;
-		$output .= '      data: { action: "mlp_display_folder_contents_ajax", current_folder_id: "' . $current_folder_id . '", image_link: "' . $image_link . '", mif_visible: mif_visible, nonce: mgmlp_ajax.nonce },' . PHP_EOL;
+		$output .= '      data: { action: "mlp_display_folder_contents_ajax", current_folder_id: "' . esc_attr($current_folder_id) . '", image_link: "' . esc_attr($image_link) . '", mif_visible: mif_visible, nonce: mgmlp_ajax.nonce },' . PHP_EOL;
     $output .= '      url: mgmlp_ajax.ajaxurl,' . PHP_EOL;
 		$output .= '      dataType: "html",' . PHP_EOL;
 		$output .= '      success: function (data) ' . PHP_EOL;
 		$output .= '        {' . PHP_EOL;
-		//$output .= '				  console.log(window.hide_checkboxes);' . PHP_EOL;
-		//$output .= '				  if(window.hide_checkboxes) {' . PHP_EOL;
-		//$output .= '					  jQuery("div#mgmlp-tb-container input.mgmlp-media").hide();' . PHP_EOL;
-		//$output .= '	          jQuery("a.tb-media-attachment").css("cursor", "pointer");' . PHP_EOL;
-		//$output .= '				  } else {' . PHP_EOL;
-		//$output .= '					  jQuery("div#mgmlp-tb-container input.mgmlp-media").show();' . PHP_EOL;
-		//$output .= '	          jQuery("a.tb-media-attachment").css("cursor", "default");' . PHP_EOL;
-		//$output .= '				  }' . PHP_EOL;
 		$output .= '          jQuery("#mgmlp-file-container").html(data);' . PHP_EOL;		
 		$output .= '          jQuery("li a.media-attachment").draggable({' . PHP_EOL;
 		$output .= '          	cursor: "move",' . PHP_EOL;
@@ -1651,18 +1516,34 @@ and pm.meta_key = '_wp_attached_file'";
 		$output .= '	   });' . PHP_EOL;
 		
 		if($folders_path !== '') {
-		  $output .= '   jQuery("#mgmlp-breadcrumbs").html("'. __('Location:','maxgalleria-media-library') . " " . addslashes($folders_path) .'");' . PHP_EOL;
+		  $output .= '   jQuery("#mgmlp-breadcrumbs").html("'. esc_html__('Location:','maxgalleria-media-library') . " " . addslashes($folders_path) .'");' . PHP_EOL;
 		}
 				
     $output .= '	});' . PHP_EOL;
     $output .= '</script>' . PHP_EOL;
 		
-		if($echo)
-			echo $output;
-		else
-			return $output;
+    add_filter( 'wp_kses_allowed_html', array($this, 'kses_mlf_add_allowed_html'), 10, 4);    
+		if($echo) {
+			echo wp_kses_post($output);
+    } else {
+			return wp_kses_post($output);
+    }  
+    remove_filter( 'wp_kses_allowed_html', array($this, 'kses_mlf_add_allowed_html'));    
 				
 	}
+  
+  public function kses_mlf_add_allowed_html($html, $context) {                
+    if($context == 'post') {
+      $new_html = array(
+        'script' => array(
+          'type' => 1
+        )
+      );
+      
+      $html = array_merge($html, $new_html);
+    }
+    return $html;
+  }
   	
 	public function in_array_r($needle, $haystack, $strict = false) {
     foreach ($haystack as $item) {
@@ -1673,8 +1554,9 @@ and pm.meta_key = '_wp_attached_file'";
     return false;
   }
 
-
 	public function mlp_display_folder_contents_ajax() {
+    
+    error_log("mlp_display_folder_contents_ajax");
 		
     global $wpdb;
 		    
@@ -1694,26 +1576,26 @@ and pm.meta_key = '_wp_attached_file'";
     }
     
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
     
     if ((isset($_POST['current_folder_id'])) && (strlen(trim($_POST['current_folder_id'])) > 0))
-      $current_folder_id = trim(stripslashes(strip_tags($_POST['current_folder_id'])));
+      $current_folder_id = trim(sanitize_text_field($_POST['current_folder_id']));
 		else
 			$current_folder_id = 0;
 		
     if ((isset($_POST['image_link'])) && (strlen(trim($_POST['image_link'])) > 0))
-      $image_link = trim(stripslashes(strip_tags($_POST['image_link'])));
+      $image_link = trim(sanitize_text_field($_POST['image_link']));
 		else
 			$image_link = "0";
     
     if ((isset($_POST['display_type'])) && (strlen(trim($_POST['display_type'])) > 0))
-      $display_type = trim(stripslashes(strip_tags($_POST['display_type'])));
+      $display_type = trim(sanitize_text_field($_POST['display_type']));
 		else
 			$display_type = 0;
     
     if ((isset($_POST['mif_visible'])) && (strlen(trim($_POST['mif_visible'])) > 0))
-      $mif_visible = trim(stripslashes(strip_tags($_POST['mif_visible'])));
+      $mif_visible = trim(sanitize_text_field($_POST['mif_visible']));
 		else
 			$mif_visible = false;
 		
@@ -1731,6 +1613,8 @@ and pm.meta_key = '_wp_attached_file'";
 	}
 	
 	public function mlp_display_folder_contents_images_ajax() {
+    
+    error_log("mlp_display_folder_contents_images_ajax");
 	
     global $wpdb;
 		        
@@ -1748,21 +1632,21 @@ and pm.meta_key = '_wp_attached_file'";
     }
     
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
 		
     if ((isset($_POST['current_folder_id'])) && (strlen(trim($_POST['current_folder_id'])) > 0))
-      $current_folder_id = trim(stripslashes(strip_tags($_POST['current_folder_id'])));
+      $current_folder_id = trim(sanitize_text_field($_POST['current_folder_id']));
 		else
 			$current_folder_id = 0;
 		
     if ((isset($_POST['image_link'])) && (strlen(trim($_POST['image_link'])) > 0))
-      $image_link = trim(stripslashes(strip_tags($_POST['image_link'])));
+      $image_link = trim(sanitize_text_field($_POST['image_link']));
 		else
 			$image_link = "0";
 		
     if ((isset($_POST['display_type'])) && (strlen(trim($_POST['display_type'])) > 0))
-      $display_type = trim(stripslashes(strip_tags($_POST['display_type'])));
+      $display_type = trim(sanitize_text_field($_POST['display_type']));
 		else
 			$display_type = 0;
 		
@@ -1775,13 +1659,15 @@ and pm.meta_key = '_wp_attached_file'";
 	}
 	
 	public function display_folder_nav_ajax () {
+    
+    error_log("display_folder_nav_ajax");
 		
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
 		
     if ((isset($_POST['current_folder_id'])) && (strlen(trim($_POST['current_folder_id'])) > 0))
-      $current_folder_id = trim(stripslashes(strip_tags($_POST['current_folder_id'])));
+      $current_folder_id = trim(sanitize_text_field($_POST['current_folder_id']));
 		else
 			$current_folder_id = 0;
 				
@@ -1796,21 +1682,17 @@ and pm.meta_key = '_wp_attached_file'";
 	public function mlp_get_folder_data() {
 				
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
 				
     if ((isset($_POST['current_folder_id'])) && (strlen(trim($_POST['current_folder_id'])) > 0)) 
-      $current_folder_id = trim(stripslashes(strip_tags($_POST['current_folder_id'])));
+      $current_folder_id = trim(sanitize_text_field($_POST['current_folder_id']));
 		else
 		  $current_folder_id = get_option(MAXGALLERIA_MEDIA_LIBRARY_UPLOAD_FOLDER_ID );        								
 				
 		$folders = array();
 		$folders = $this->get_folder_data($current_folder_id);
 					
-		//$output = print_r($folders, true);
-		//error_log($output);
-		
-		//error_log(json_encode($folders));
 		echo json_encode($folders);
 		
 		die();
@@ -1820,17 +1702,7 @@ and pm.meta_key = '_wp_attached_file'";
 	public function get_folder_data($current_folder_id) {
 		
     global $wpdb;
-		
-// we used to use this to display the folders		
-//    $sql = "select ID, guid, post_title, $folder_table.folder_id
-//from $wpdb->prefix" . "posts
-//LEFT JOIN $folder_table ON($wpdb->prefix" . "posts.ID = $folder_table.post_id)
-//where post_type = '" . MAXGALLERIA_MEDIA_LIBRARY_POST_TYPE ."' 
-//and folder_id = $current_folder_id 
-//order by $order_by";		
-//            $rows = $wpdb->get_results($sql);
-		//error_log("get_folder_data $current_folder_id");
-		
+				
 		$folder_parents = $this->get_parents($current_folder_id);
 		$folder_table = $wpdb->prefix . MAXGALLERIA_MEDIA_LIBRARY_FOLDER_TABLE;
 		
@@ -1840,7 +1712,6 @@ LEFT JOIN $folder_table ON({$wpdb->prefix}posts.ID = $folder_table.post_id)
 where post_type = '" . MAXGALLERIA_MEDIA_LIBRARY_POST_TYPE ."' 
 order by folder_id";
 						
-
 			$add_child = array();
 			$folders = array();
 			$first = true;
@@ -1853,22 +1724,21 @@ order by folder_id";
 						if($row->ID > $max_id)
 							$max_id = $row->ID;
 						$folder = array();
-						$folder['id'] = $row->ID;
+						$folder['id'] = esc_attr($row->ID);
 						if($row->folder_id === '0') {
 							$folder['parent'] = '#';
-							//$folder['children'] = true;
 						} else {
               if(!$row->folder_id)
 						    continue;
 						  // check if parent folder even exists
 						  $sql = "select ID from {$wpdb->prefix}posts
-						    where ID = {$row->folder_id} and post_type = '".MAXGALLERIA_MEDIA_LIBRARY_POST_TYPE."'";
+						    where ID = " . esc_attr($row->folder_id) . " and post_type = '".MAXGALLERIA_MEDIA_LIBRARY_POST_TYPE."'";
 						  if (count($wpdb->get_results($sql)) == 0)
 						    continue;
-						  $folder['parent'] = $row->folder_id;
+						  $folder['parent'] = esc_attr($row->folder_id);
 						}
 
-						$folder['text'] = $row->post_title;
+						$folder['text'] = esc_html($row->post_title);
 						$state = array();
 					if($row->folder_id === '0') {
 						$state['opened'] = true;
@@ -1890,18 +1760,11 @@ order by folder_id";
 					$folder['state'] = $state;
 					
 					$a_attr  = array();
-					$a_attr['href'] = "#" . $row->ID;
+					$a_attr['href'] = "#" . esc_attr($row->ID);
 					$a_attr['target'] = '_self';
 
 					$folder['a_attr'] = $a_attr;
 					
-
-//					$a_attr  = array();
-//					$a_attr['href'] = site_url() . "/wp-admin/admin.php?page=media-library-folders&media-folder=" . $row->ID;
-//					$a_attr['target'] = '_self';
-//
-//					$folder['a_attr'] = $a_attr;
-
 					$add_child[] = $row->ID;
 					$child_index = array_search($row->folder_id, $add_child);
 					if($child_index !== false)
@@ -1910,26 +1773,11 @@ order by folder_id";
 					$folders[] = $folder;
 				}
 
-//				$max_id += 99999;
-//				foreach($add_child as $child) {
-//					$max_id++;
-//					$folder = array();
-//					$folder['id'] = $max_id;
-//					$folder['parent'] = $child;
-//					$folder['text'] = "empty node";
-//					$state = array();
-//					$state['opened'] = false;
-//					$state['disabled'] = true;
-//					$state['selected'] = false;
-//					$folder['state'] = $state;
-//					$folders[] = $folder;							
-//				}
 			}
 
 			return $folders;
 		
 	}
-  
   
   public function new_folder_check() {
     
@@ -1944,11 +1792,8 @@ order by folder_id";
     }  
     
     $folder_check_seconds = strtotime($folder_check . ' +1 hour');
-    
-    //error_log("Last check: " . $folder_check_seconds . " : " . "Current time: " .  $currnet_date_time_seconds);
-    
+        
     if($folder_check_seconds < $currnet_date_time_seconds) {
-      //error_log("checking folders $currnet_date_time");
       $this->admin_check_for_new_folders(true);
 			update_option('mlf-folder-check', $currnet_date_time, true);
     }		
@@ -1958,16 +1803,7 @@ order by folder_id";
 	public function display_folder_nav($current_folder_id, $folder_table ) {
 	
     global $wpdb;
-		
-// we used to use this to display the folders		
-//    $sql = "select ID, guid, post_title, $folder_table.folder_id
-//from $wpdb->prefix" . "posts
-//LEFT JOIN $folder_table ON($wpdb->prefix" . "posts.ID = $folder_table.post_id)
-//where post_type = '" . MAXGALLERIA_MEDIA_LIBRARY_POST_TYPE ."' 
-//and folder_id = $current_folder_id 
-//order by $order_by";		
-//            $rows = $wpdb->get_results($sql);
-    
+    		
     if(!defined('SKIP_AUTO_FOLDER_CHECK'))
       $this->new_folder_check();
     
@@ -1983,9 +1819,6 @@ order by folder_id";
 					$folders = array();
 					$folders = $this->get_folder_data($current_folder_id);
 					
-					//$output = print_r($folders, true);
-					//error_log($output);
-
 					?>
 			
 <script>
@@ -2009,7 +1842,6 @@ order by folder_id";
 				'default' : { 'icon' : 'folder' },
         'file' : { 'icon' :'folder'},
 				'valid_children' : {'icon' :'folder'}	 
- 				//'file' : { 'valid_children' : [], 'icon' : 'file' }
 			},
 			'sort' : function(a, b) {
 				return this.get_type(a).toLowerCase() === this.get_type(b).toLowerCase() ? (this.get_text(a).toLowerCase() > this.get_text(b).toLowerCase() ? 1 : -1) : (this.get_type(a).toLowerCase() >= this.get_type(b).toLowerCase() ? 1 : -1);
@@ -2022,7 +1854,7 @@ order by folder_id";
 							 "Remove": {
 								 "separator_before": false,
 								 "separator_after": false,
-								 "label": "<?php _e('Delete this folder?','maxgalleria-media-library'); ?>",
+								 "label": "<?php esc_html_e('Delete this folder?','maxgalleria-media-library'); ?>",
 								 "action": function (obj) { 
 										var delete_ids = new Array();
 										delete_ids[delete_ids.length] = jQuery($node).attr('id');
@@ -2031,7 +1863,7 @@ order by folder_id";
 										var to_delete = jQuery($node).attr('id');
 										var parent_id = jQuery($node).attr('parent');
 										
-										if(confirm("<?php _e('Are you sure you want to delete the selected folder?','maxgalleria-media-library'); ?>")) {	
+										if(confirm("<?php esc_html_e('Are you sure you want to delete the selected folder?','maxgalleria-media-library'); ?>")) {	
 											var serial_delete_ids = JSON.stringify(delete_ids.join());
 											jQuery("#ajaxloader").show();
 											jQuery.ajax({
@@ -2041,18 +1873,16 @@ order by folder_id";
 												url : mgmlp_ajax.ajaxurl,
 												dataType: "json",
 												success: function (data) {
-													jQuery("#ajaxloader").hide();            
 													
 													jQuery("#folder-message").html(data.message);
 													if(data.refresh) {
 														jQuery('#folder-tree').jstree(true).settings.core.data = data.folders;
 														jQuery('#folder-tree').jstree(true).refresh();			
 														setTimeout(function() { jQuery('#folder-tree').jstree('select_node', '#' + parent_id); }, 4000);
-														//jQuery('#folder-tree').jstree('select_node', '#' + parent_id, true);
-														//jQuery('#folder-tree').jstree('toggle_expand', '#' + parent_id, true );
 														jQuery("#folder-message").html('');
 														jQuery("#current-folder-id").val(parent_id);
 													}																																																															
+													jQuery("#ajaxloader").hide();            
 												},
 												error: function (err)
 													{ alert(err.responseText);}
@@ -2063,13 +1893,12 @@ order by folder_id";
 							 "Hide": {
 								 "separator_before": false,
 								 "separator_after": false,
-								 "label": "<?php _e('Hide this folder? This will remove the folder contents from the media library database.','maxgalleria-media-library'); ?>",
+								 "label": "<?php esc_html_e('Hide this folder? This will remove the folder contents from the media library database.','maxgalleria-media-library'); ?>",
 								 "action": function (obj) { 
-										//var hide_id = jQuery($node).attr('id');										
 										var folder_id = jQuery('#folder_id').val();      
 										var to_hide = jQuery($node).attr('id');
 
-								    if(confirm("<?php _e('Are you sure you want to hide the selected folder and all its sub folders and files?','maxgalleria-media-library'); ?>")) {
+								    if(confirm("<?php esc_html_e('Are you sure you want to hide the selected folder and all its sub folders and files?','maxgalleria-media-library'); ?>")) {
 											//var serial_delete_ids = JSON.stringify(delete_ids.join());
 											jQuery("#ajaxloader").show();
 											jQuery.ajax({
@@ -2079,8 +1908,8 @@ order by folder_id";
 												url : mgmlp_ajax.ajaxurl,
 												dataType: "html",
 												success: function (data) {
-													jQuery("#ajaxloader").hide();            
 													jQuery("#folder-message").html(data);
+													jQuery("#ajaxloader").hide();            
 												},
 												error: function (err)
 													{ alert(err.responseText);}
@@ -2102,7 +1931,6 @@ order by folder_id";
 		jQuery('#folder-tree').droppable( {
 				accept: 'li a.media-attachment',
 				hoverClass: 'jstree-anchor',
-				//hoverClass: 'droppable-hover',
 				drop: handleTreeDropEvent
 		});
 	
@@ -2133,8 +1961,8 @@ function show_mlp_node (e, data) {
       url : mgmlp_ajax.ajaxurl,
       dataType: "html",
       success: function (data) {
-        jQuery("#ajaxloader").hide();          
         jQuery("#mgmlp-file-container").html(data);						
+        jQuery("#ajaxloader").hide();          
         jQuery("#current-folder-id").val(folder);
         jQuery("#folder_id").val(folder);
         sessionStorage.setItem('folder_id', folder);
@@ -2157,14 +1985,6 @@ function show_mlp_node (e, data) {
           hoverClass: "droppable-hover",
           drop: handleDropEvent
         });					
-
-        //if(window.hide_checkboxes) {
-        //  jQuery("div#mgmlp-tb-container input.mgmlp-media").hide();
-        //  jQuery("a.tb-media-attachment").css("cursor", "pointer");
-        //} else {
-        //  jQuery("div#mgmlp-tb-container input.mgmlp-media").show();
-        //  jQuery("a.tb-media-attachment").css("cursor", "default");
-        //}	
       },
       error: function (err) { 
         alert(err.responseText);
@@ -2246,29 +2066,35 @@ function process_mc_data(phase, folder_id, action_name, parent_folder, serial_co
   <?php
 							
 	}
-	
+  
 	public function display_files($image_link, $current_folder_id, $folder_table, $display_type, $order_by, $mif_visible = false) {
+    
+    error_log("display_files");
 		
     global $wpdb;
     $images_found = false;
     $images_pre_page = get_option(MAXGALLERIA_MLP_ITEMS_PRE_PAGE, '500');
+    if(empty($images_pre_page))
+      $images_pre_page = '500';
+    
+    $allowed_html = array(
+      'input' => array(
+        'type' => array(),
+        'class' => array(),
+        'id' => array(),
+        'value' => array()
+      )    
+    );                  
 
 		if($image_link === "1")
 			$image_link = true;
 		else
 			$image_link = false;
 						
-		
-				
-            echo '<ul class="mg-media-list">' . PHP_EOL;              
-            
-//            $sql = "select ID, guid, post_title, $folder_table.folder_id 
-//from $wpdb->prefix" . "posts 
-//LEFT JOIN $folder_table ON($wpdb->prefix" . "posts.ID = $folder_table.post_id)
-//where post_type = 'attachment' 
-//and folder_id = '$current_folder_id'
-//order by $order_by";
-						
+            ?>
+            <ul class="mg-media-list">
+            <?php  
+            						
             $sql = "select ID, post_title, $folder_table.folder_id, pm.meta_value as attached_file 
 from {$wpdb->prefix}posts 
 LEFT JOIN $folder_table ON({$wpdb->prefix}posts.ID = $folder_table.post_id)
@@ -2278,6 +2104,8 @@ and folder_id = '$current_folder_id'
 AND pm.meta_key = '_wp_attached_file' 
 order by $order_by limit 0, $images_pre_page";
 
+            //error_log($sql);
+
             $rows = $wpdb->get_results($sql);            
             if($rows) {
               $images_found = true;
@@ -2285,12 +2113,11 @@ order by $order_by limit 0, $images_pre_page";
 								
 								// use wp_get_attachment_image to get the PDF preview
 								$thumbnail_html = "";
-								//$thumbnail_html = wp_get_attachment_image( $row->ID, 'thumbnail', false, '');
 								$thumbnail_html = wp_get_attachment_image( $row->ID);
 								if(!$thumbnail_html){
 									$thumbnail = wp_get_attachment_thumb_url($row->ID);                
 									if($thumbnail === false) {
-										$thumbnail = MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/file.jpg";
+										$thumbnail = esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/file.jpg");
 									}  
 									$thumbnail_html = "<img alt='' src='$thumbnail' />";
 								}
@@ -2309,62 +2136,45 @@ order by $order_by limit 0, $images_pre_page";
 								else
                   $media_edit_link = "/wp-admin/upload.php?item=" . $row->ID;
 									
-					      //$image_location = $this->check_for_attachment_id($row->guid, $row->ID);
-							  //$image_location = $this->upload_dir['baseurl'] . '/' . $row->attached_file;
-								$baseurl = $this->upload_dir['baseurl'];
-								$baseurl = rtrim($baseurl, '/') . '/';
-								$image_location = $baseurl . ltrim($row->attached_file, '/');
+                $image_location = $this->build_location_url($row->attached_file);
 								                
                 $filename = pathinfo($image_location, PATHINFO_BASENAME);
-								
-								//error_log("mif_visible $mif_visible image_link $image_link");
-                                								
-//                echo "<li id='$row->ID'>" . PHP_EOL;
-//                echo "   <a id='$row->ID' target='_blank' class='$class' href='" . site_url() . $media_edit_link . "'>$thumbnail_html</a>" . PHP_EOL;
-//                //echo "   <a id='$row->ID' target='_blank' class='$class' href='" . site_url() . $media_edit_link . "'><img alt='' src='$thumbnail' /></a>" . PHP_EOL;
-//                echo "   <div class='attachment-name'><span class='image_select'>$checkbox</span>$filename</div>" . PHP_EOL;
-//                echo "</li>" . PHP_EOL;              
-                
-                 echo "<li id='$row->ID'>" . PHP_EOL;
-                 echo "   <a id='$row->ID' target='_blank' class='$class' href='" . site_url() . $media_edit_link . "'>$thumbnail_html</a>" . PHP_EOL;
-                 //echo "   <a id='$row->ID' target='_blank' class='$class' href='" . site_url() . $media_edit_link . "'><img alt='' src='$thumbnail' /></a>" . PHP_EOL;
-                 echo "   <div class='attachment-name'><label><span class='image_select'>$checkbox</span>$filename</label></div>" . PHP_EOL;
-                 echo "</li>" . PHP_EOL;              
-                
-								
+								                
+                ?>
+                <li id='<?php echo esc_attr($row->ID) ?>'>
+                  <a id='<?php echo esc_attr($row->ID) ?>' target='_blank' class='<?php echo esc_attr($class) ?>' href='<?php echo esc_url_raw(site_url() . $media_edit_link) ?>'><?php echo wp_kses_post($thumbnail_html) ?></a>
+                  <div class='attachment-name'><label><span class='image_select'><?php echo wp_kses($checkbox, $allowed_html) ?></span><?php echo esc_html($filename) ?></label></div>
+                </li>
+                <?php
+                                 								
               }      
             }
-            echo '</ul>' . PHP_EOL;
-
+            ?>
+            </ul>
 						
-						echo '      <script>' . PHP_EOL;
-						echo '				jQuery(document).ready(function(){' . PHP_EOL;
-            echo '			    jQuery("#folder-message").html("");' . PHP_EOL;
-//						echo '				  console.log(window.hide_checkboxes);' . PHP_EOL;
-						//echo '				  if(window.hide_checkboxes) {' . PHP_EOL;
-						//echo '					  jQuery("div#mgmlp-tb-container input.mgmlp-media").hide();' . PHP_EOL;
-						//echo '	          jQuery("a.tb-media-attachment").css("cursor", "pointer");' . PHP_EOL;
-						//echo '				  } else {' . PHP_EOL;
-						//echo '					  jQuery("div#mgmlp-tb-container input.mgmlp-media").show();' . PHP_EOL;
-						//echo '	          jQuery("a.tb-media-attachment").css("cursor", "default");' . PHP_EOL;
-						//echo '				  }' . PHP_EOL;
-						echo '          jQuery("li a.media-attachment").draggable({' . PHP_EOL;
-						echo '          	cursor: "move",' . PHP_EOL;
-						echo '            helper: function() {' . PHP_EOL;
-						echo '          	  var selected = jQuery(".mg-media-list input:checked").parents("li");' . PHP_EOL;
-						echo '          	  if (selected.length === 0) {' . PHP_EOL;
-						echo '          		  selected = jQuery(this);' . PHP_EOL;
-						echo '          	  }' . PHP_EOL;
-						echo '          	  var container = jQuery("<div/>").attr("id", "draggingContainer");' . PHP_EOL;
-						echo '          	  container.append(selected.clone());' . PHP_EOL;
-						echo '          	  return container;' . PHP_EOL;
-						echo '            }' . PHP_EOL;
-						echo '          });' . PHP_EOL;
-						echo '        });' . PHP_EOL;
-						echo '      </script>' . PHP_EOL;						
-    
-            if(!$images_found)
-              echo "<p style='text-align:center'>" . __('No files were found.','maxgalleria-media-library')  . "</p>";
+            <script>
+              jQuery(document).ready(function(){
+                jQuery("#folder-message").html("");
+                jQuery("li a.media-attachment").draggable({
+                  cursor: "move",
+                  helper: function() {
+                    var selected = jQuery(".mg-media-list input:checked").parents("li");
+                    if (selected.length === 0) {
+                      selected = jQuery(this);
+                    }
+                    var container = jQuery("<div/>").attr("id", "draggingContainer");
+                    container.append(selected.clone());
+                    return container;
+                  }
+                });
+              });
+            </script>				
+            <?php
+            if(!$images_found) { 
+              ?>
+              <p style='text-align:center; width:103%'><?php esc_html_e('No files were found.','maxgalleria-media-library') ?></p>
+              <?php
+            }  
 						
 		
 		
@@ -2401,7 +2211,6 @@ AND meta_key = '_wp_attached_file'";
 		
     $row = $wpdb->get_row($sql);
 		
-	  //$image_location = $this->upload_dir['baseurl'] . '/' . $row->attached_file;
 		$baseurl = $this->upload_dir['baseurl'];
 		$baseurl = rtrim($baseurl, '/') . '/';
 		$image_location = $baseurl . ltrim($row->attached_file, '/');
@@ -2469,18 +2278,20 @@ where ID = $folder_id";
   
   public function create_new_folder() {
     
+    error_log("create_new_folder");
+    
     global $wpdb;
     
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
 
     if ((isset($_POST['parent_folder'])) && (strlen(trim($_POST['parent_folder'])) > 0))
-      $parent_folder_id = trim(stripslashes(strip_tags($_POST['parent_folder'])));
+      $parent_folder_id = trim(sanitize_text_field($_POST['parent_folder']));
     
     
     if ((isset($_POST['new_folder_name'])) && (strlen(trim($_POST['new_folder_name'])) > 0))
-      $new_folder_name = trim(stripslashes(strip_tags($_POST['new_folder_name'])));
+      $new_folder_name = trim(sanitize_text_field($_POST['new_folder_name']));
     
       $sql = "select meta_value as attached_file
 from {$wpdb->prefix}postmeta 
@@ -2495,15 +2306,15 @@ AND meta_key = '_wp_attached_file'";
 				        
     $absolute_path = $this->get_absolute_path($image_location);
 		$absolute_path = rtrim($absolute_path, '/') . '/';
-		$this->write_log("absolute_path $absolute_path");
+		//$this->write_log("absolute_path $absolute_path");
         
     $new_folder_path = $absolute_path . $new_folder_name ;
-		$this->write_log("new_folder_path $new_folder_path");
+		//$this->write_log("new_folder_path $new_folder_path");
     
     $new_folder_url = $this->get_file_url_for_copy($new_folder_path);
-		$this->write_log("new_folder_url $new_folder_url");
+		//$this->write_log("new_folder_url $new_folder_url");
 		
-		$this->write_log("Trying to create directory at $new_folder_path, $parent_folder_id, $new_folder_url");
+		//$this->write_log("Trying to create directory at $new_folder_path, $parent_folder_id, $new_folder_url");
     
     if(!file_exists($new_folder_path)) {
       if(mkdir($new_folder_path)) {
@@ -2514,31 +2325,21 @@ AND meta_key = '_wp_attached_file'";
         //if($this->add_media_folder($new_folder_name, $parent_folder_id, $new_folder_url)){
 				$new_folder_id = $this->add_media_folder($new_folder_name, $parent_folder_id, $new_folder_url);
 				if($new_folder_id) {
-            //$location = 'window.location.href = "' . home_url() . '/wp-admin/admin.php?page=media-library-folders&media-folder=' . $parent_folder_id .'";';
-          //echo __('The folder was created.','maxgalleria-media-library');
-            //echo "<script>$location</script>";
-            //$this->display_folder_contents ($parent_folder_id);
-            //$folder_table = $wpdb->prefix . MAXGALLERIA_MEDIA_LIBRARY_FOLDER_TABLE;
-					
-				  //$this->display_folder_nav($parent_folder_id, $folder_table);
-				  //error_log('display_folder_nav');
-					
 					
           $message = __('The folder was created.','maxgalleria-media-library');
 					$folders = $this->get_folder_data($parent_folder_id);
-					$data = array ('message' =>$message, 'folders' => $folders, 'refresh' => true, 'new_folder' => $new_folder_id );
+					$data = array ('message' => esc_html($message), 'folders' => $folders, 'refresh' => true, 'new_folder' => esc_attr($new_folder_id));
 					echo json_encode($data);
 					
         } else {					
           $message = __('There was a problem creating the folder.','maxgalleria-media-library');
-					$data = array ('message' => $message,  'refresh' => false );
+					$data = array ('message' => esc_html($message),  'refresh' => false );
 					echo json_encode($data);
 				}	
       }
     } else {
-      //echo __('The folder already exists.','maxgalleria-media-library');
 			$message = __('The folder already exists.','maxgalleria-media-library');
-			$data = array ('message' => $message,  'refresh' => false );
+			$data = array ('message' => esc_html($message),  'refresh' => false );
 			echo json_encode($data);
 		}	
     die();
@@ -2553,27 +2354,20 @@ AND meta_key = '_wp_attached_file'";
 		if(is_multisite()) {
 			$url_slug = "site" . $blog_id . "/";
 			$baseurl = str_replace($url_slug, "", $baseurl);
-			if(strpos($url, 'wp-content') === false)
+			if(strpos($url, MLF_WP_CONTENT_FOLDER_NAME) === false)
 			  $url = str_replace($url_slug, "wp-content/uploads/sites/" . $blog_id . "/" , $url);
 			else
 			  $url = str_replace($url_slug, "", $url);
 		}
 		
-    //$file_path = str_replace( $this->upload_dir['baseurl'], $this->upload_dir['basedir'], $url ); 
     $file_path = str_replace( $baseurl, $this->upload_dir['basedir'], $url ); 
     // fix the slashes
     if(strpos($this->upload_dir['basedir'], '\\') !== false)
       $file_path = str_replace('/', '\\', $file_path);
-    
-		
-		//$this->write_log("url $url");
-		//$this->write_log("baseurl "  . $this->upload_dir['baseurl']);
-		//$this->write_log("basedir " . $this->upload_dir['basedir']);
-		//$this->write_log("file_path $file_path");
-				
+    				
 		//first attempt failed; try again
 		if((strpos($file_path, "http:") !== false) || (strpos($file_path, "https:") !== false)) {	
-			$this->write_log("absolute path, second attempt $file_path");
+			//$this->write_log("absolute path, second attempt $file_path");
 			$baseurl = $this->upload_dir['baseurl'];
 			$base_length = strlen($baseurl);
 			//compare the two urls
@@ -2582,11 +2376,11 @@ AND meta_key = '_wp_attached_file'";
 				$non_base_file = substr($url, $base_length);
 				$file_path = $this->upload_dir['basedir'] . DIRECTORY_SEPARATOR . $non_base_file;			
 			} else {
-				$this->write_log("url_stub $url_stub");
-				$this->write_log("baseurl $baseurl");
-				$new_msg = "The URL to the folder or image is not correct: $url";
-				$this->write_log($new_msg);
-				echo $new_msg;
+				//$this->write_log("url_stub $url_stub");
+				//$this->write_log("baseurl $baseurl");
+        $new_msg = __('The URL to the folder or image is not correct: ','maxgalleria-media-library') . esc_url_raw($url);
+				//$this->write_log($new_msg);
+				echo esc_html($new_msg);
 			}
 		}
 		    
@@ -2594,9 +2388,7 @@ AND meta_key = '_wp_attached_file'";
     if ($is_IIS || strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' || strtoupper(substr(PHP_OS, 0, 13)) == 'MICROSOFT-IIS' ) {
       $file_path = str_replace('/', '\\', $file_path);
     }
-		
-		//$this->write_log("file_path 2 $file_path");
-				
+						
     return $file_path;
   }
   
@@ -2611,8 +2403,6 @@ AND meta_key = '_wp_attached_file'";
   public function get_file_url($path) {
 		global $is_IIS;
     
-    //error_log("uploads_folder_name " . $this->uploads_folder_name);
-        
     if ($is_IIS || strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' || strtoupper(substr(PHP_OS, 0, 13)) == 'MICROSOFT-IIS' ) {
       
       $base_url = $this->upload_dir['baseurl'];
@@ -2623,10 +2413,6 @@ AND meta_key = '_wp_attached_file'";
       $file_url = $base_url . '/' . $relative_path;
       $file_url = str_replace('\\', '/', $file_url);      
               
-      // replace any slashes in the dir path when running windows
-      //$base_upload_dir1 = $this->upload_dir['basedir'];
-      //$base_upload_dir2 = str_replace('\\', '/', $base_upload_dir1);      
-      //$file_url = str_replace( $base_upload_dir2, $base_url, $path ); 
     }
     else {
       $file_url = str_replace( $this->upload_dir['basedir'], $this->upload_dir['baseurl'], $path );          
@@ -2656,26 +2442,28 @@ AND meta_key = '_wp_attached_file'";
   }
   
   public function delete_maxgalleria_media() {
+    
+    error_log("delete_maxgalleria_media");
+    
     global $wpdb, $is_IIS;
     $delete_ids = array();
     $folder_deleted = true;
     $message = "";
     
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit( esc_html__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
     
     if ((isset($_POST['serial_delete_ids'])) && (strlen(trim($_POST['serial_delete_ids'])) > 0)) {
-      $delete_ids = trim(stripslashes(strip_tags($_POST['serial_delete_ids'])));
+      $delete_ids = trim(stripslashes(sanitize_text_field($_POST['serial_delete_ids'])));
       $delete_ids = str_replace('"', '', $delete_ids);
-		  //$this->write_log("delete_ids $delete_ids");
       $delete_ids = explode(",",$delete_ids);
     }  
     else
       $delete_ids = '';
 		
     if ((isset($_POST['parent_id'])) && (strlen(trim($_POST['parent_id'])) > 0))
-      $parent_folder = trim(stripslashes(strip_tags($_POST['parent_id'])));
+      $parent_folder = trim(sanitize_text_field($_POST['parent_id']));
 		else
 			$parent_folder = "0";
 		
@@ -2685,7 +2473,7 @@ AND meta_key = '_wp_attached_file'";
       // prevent uploads folder from being deleted
       if(intval($delete_id) == intval($this->uploads_folder_ID)) {
 				$message = __('The uploads folder cannot be deleted.','maxgalleria-media-library');
-				$data = array ('message' =>$message, 'refresh' => false );
+				$data = array ('message' => esc_html($message), 'refresh' => false );
         echo json_encode($data);
         die();
       }
@@ -2710,13 +2498,13 @@ AND pm.meta_key = '_wp_attached_file'";
 
 				if($row->post_type === MAXGALLERIA_MEDIA_LIBRARY_POST_TYPE) { //folder
 
-					$sql = "SELECT COUNT(*) FROM $wpdb->prefix" . MAXGALLERIA_MEDIA_LIBRARY_FOLDER_TABLE . " where folder_id = $delete_id";
+					$sql = "SELECT COUNT(*) FROM $table where folder_id = $delete_id";
 					$row_count = $wpdb->get_var($sql);
 
 					if($row_count > 0) {
 						$message = __('The folder, ','maxgalleria-media-library'). $row->post_title . __(', is not empty. Please delete or move files from the folder','maxgalleria-media-library') . PHP_EOL;      
 						
-						$data = array ('message' =>$message, 'refresh' => false );
+						$data = array ('message' => esc_html($message), 'refresh' => false );
 						echo json_encode($data);
 						
 						die();
@@ -2738,35 +2526,6 @@ AND pm.meta_key = '_wp_attached_file'";
               }         
             }          
           }                                    
-
-//					if(file_exists($folder_path)) {
-//						if(is_dir($folder_path)) {  //folder
-//              @chmod($folder_path, 0777);
-//              $this->write_log("Deleting $folder_path");
-//              // try to delete first
-//              rmdir($folder_path);              
-//              if(file_exists($folder_path)) {
-//                $this->remove_hidden_files($folder_path);
-//                if($this->is_dir_empty($folder_path)) {
-//                  //unlink($folder_path. "/.DS_Store");
-//                  //error_log("folder_path $folder_path");
-//                  if(!rmdir($folder_path)) {
-//                    $message = __('The folder could not be deleted.','maxgalleria-media-library');
-//                    $folder_deleted = false;
-//                  }  
-//                } else {
-//                  $message = __('The folder is not empty and could not be deleted.','maxgalleria-media-library');
-//                  $this->write_log($message);
-//                  $folder_deleted = false;                
-//                }
-//              }
-//						}          
-//					}                          
-										
-          //$this->display_folder_contents ($parent_folder);
-					//$this->display_folder_nav($parent_folder, $folder_table);
-					//error_log('display_folder_nav');
-					//$folders = $this->get_folder_data($parent_folder);
 					
           if($folder_deleted) {
             wp_delete_post($delete_id, true);
@@ -2774,14 +2533,13 @@ AND pm.meta_key = '_wp_attached_file'";
             $message = __('The folder was deleted.','maxgalleria-media-library');
           }
 					$folders = $this->get_folder_data($parent_folder);
-					$data = array ('message' => $message, 'folders' => $folders, 'refresh' => $folder_deleted );
+					$data = array ('message' => esc_html($message), 'folders' => $folders, 'refresh' => $folder_deleted );
 					echo json_encode($data);
 									
 					die();
 				}
 				else {
-          //error_log("deleting attachment $delete_id");
-          
+          error_log("delete_id $delete_id");
           $attached_file = get_post_meta($delete_id, '_wp_attached_file', true);
           $metadata = wp_get_attachment_metadata($delete_id);                               
           $baseurl = $this->upload_dir['baseurl'];
@@ -2790,11 +2548,12 @@ AND pm.meta_key = '_wp_attached_file'";
           $image_path = $this->get_absolute_path($image_location);
           $path_to_thumbnails = pathinfo($image_path, PATHINFO_DIRNAME);          
           
+          error_log("wp_delete_attachment");
 					if( wp_delete_attachment( $delete_id, true ) !== false ) {
 						$wpdb->delete( $table, $del_post );						
 						$message = __('The file(s) were deleted','maxgalleria-media-library') . PHP_EOL;						
             
-            //error_log("image_path $image_path");            
+            error_log("unlink image_path $image_path");            
             if(file_exists($image_path))
               unlink($image_path);
             if(isset($metadata['sizes'])) {
@@ -2818,7 +2577,7 @@ AND pm.meta_key = '_wp_attached_file'";
 
 		$files = $this->display_folder_contents ($parent_folder, true, "", false);
 		$refresh = true;
-		$data = array ('message' => $message, 'files' => $files, 'refresh' => $refresh );
+		$data = array ('message' => esc_html($message), 'files' => $files, 'refresh' => $refresh );
 		echo json_encode($data);						
     die();
   }
@@ -2866,14 +2625,16 @@ AND pm.meta_key = '_wp_attached_file'";
     
   public function add_to_max_gallery () {
     
+    error_log("add_to_max_gallery");
+    
     global $wpdb, $maxgalleria;
     
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(esc_html__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
     
     if ((isset($_POST['serial_gallery_image_ids'])) && (strlen(trim($_POST['serial_gallery_image_ids'])) > 0))
-      $serial_gallery_image_ids = trim(stripslashes(strip_tags($_POST['serial_gallery_image_ids'])));
+      $serial_gallery_image_ids = trim(sanitize_text_field($_POST['serial_gallery_image_ids']));
     else
       $serial_gallery_image_ids = "";
     
@@ -2882,7 +2643,7 @@ AND pm.meta_key = '_wp_attached_file'";
     $serial_gallery_image_ids = explode(',', $serial_gallery_image_ids);
         
     if ((isset($_POST['gallery_id'])) && (strlen(trim($_POST['gallery_id'])) > 0))
-      $gallery_id = trim(stripslashes(strip_tags($_POST['gallery_id'])));
+      $gallery_id = trim(sanitize_text_field($_POST['gallery_id']));
     else
       $gallery_id = 0;
     
@@ -2919,9 +2680,7 @@ AND pm.meta_key = '_wp_attached_file'";
           unset( $attachment[ 'ID' ] );
           $attachment[ 'post_parent' ] = $gallery_id;
           $new_attachment_id = wp_insert_post( $attachment );
-          //$new_attachment_id = $this->mpmlp_insert_post( $attachment );
           
-
           //Now, duplicate all the custom fields. (There's probably a better way to do this)
           $custom_fields = get_post_custom( $attachment_id );
 
@@ -2942,7 +2701,7 @@ AND pm.meta_key = '_wp_attached_file'";
             
     }// foreach
         
-    echo __('The images were added.','maxgalleria-media-library') . PHP_EOL;              
+    echo esc_html__('The images were added.','maxgalleria-media-library') . PHP_EOL;              
         
     die();
     
@@ -2950,14 +2709,16 @@ AND pm.meta_key = '_wp_attached_file'";
   
   public function search_media () {
     
+    error_log("search_media");
+    
     global $wpdb;
     
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
     
     if ((isset($_POST['search_value'])) && (strlen(trim($_POST['search_value'])) > 0))
-      $search_value = trim(stripslashes(strip_tags($_POST['search_value'])));
+      $search_value = trim(sanitize_text_field($_POST['search_value']));
     else
       $search_value = "";
     
@@ -2975,7 +2736,6 @@ AND pm.meta_key = '_wp_attached_file'";
             $ext = pathinfo($thumbnail, PATHINFO_EXTENSION);
           else {
 						
-            //$image_location = $this->upload_dir['baseurl'] . '/' . $row->attached_file;
 						$baseurl = $this->upload_dir['baseurl'];
 						$baseurl = rtrim($baseurl, '/') . '/';
 						$image_location = $baseurl . ltrim($row->attached_file, '/');
@@ -2984,17 +2744,17 @@ AND pm.meta_key = '_wp_attached_file'";
             $ext = substr($image_location, $ext_pos+1);
             $thumbnail = MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/file.jpg";
           }
-
-          $class = "media-attachment"; 
-          echo "<li>" . PHP_EOL;
-          echo "   <a class='$class' href='" . site_url() . "/wp-admin/upload.php?item=" . $row->ID . "'><img alt='' src='$thumbnail' /></a>" . PHP_EOL;
-          echo "   <div class='attachment-name'>$row->post_title.$ext</div>" . PHP_EOL;
-          echo "</li>" . PHP_EOL;              
+          ?>
+          <li>
+            <a class='media-attachment' href='<?php echo esc_url_raw(site_url() . "/wp-admin/upload.php?item=" . $row->ID ) ?>'><img alt='<?php echo esc_html($row->post_title . '.' . $ext) ?>' src='<?php echo esc_url($thumbnail) ?>' /></a>
+            <div class='attachment-name'><?php echo esc_html($row->post_title . '.' . $ext) ?></div>
+          </li>
+          <?php
         }      
       
     }
     else {
-      echo __('No files were found matching that name.','maxgalleria-media-library') . PHP_EOL;                      
+      echo esc_html__('No files were found matching that name.','maxgalleria-media-library') . PHP_EOL;                      
     }
     
     die();    
@@ -3002,29 +2762,33 @@ AND pm.meta_key = '_wp_attached_file'";
   
   public function search_library() {
     
+    error_log("search_library");    
+    
     global $wpdb;
+    ?>
     
-    echo '<div id="wp-media-grid" class="wrap">' . PHP_EOL;
-    //empty h2 for where WP notices will appear
-    echo '  <h2></h2>' . PHP_EOL;
-//    echo '  <div class="media-plus-toolbar wp-filter"><div class="media-toolbar-secondary">' . PHP_EOL;
-    echo '  <div class="media-plus-toolbar wp-filter">' . PHP_EOL;
-    echo '<div id="mgmlp-title-area">' . PHP_EOL;
-		echo '  <h2 class="mgmlp-title">'. __('Media Library Folders Search Results','maxgalleria-media-library') . '</h2>' . PHP_EOL;
-    echo '  <div>' . PHP_EOL;
-    echo '    <p><a href="' . site_url() . '/wp-admin/admin.php?page=media-library-folders">Back to Media Library Folders</a></p>' . PHP_EOL;
-    echo '    <p><input type="search" placeholder="Search" id="mgmlp-media-search-input" class="search"> <a id="mlfp-media-search-2" class="gray-blue-link" >' .  __('Search','maxgalleria-media-library') . '</a></p>' . PHP_EOL;            
-    echo '  </div>' . PHP_EOL;
+    <div id="wp-media-grid" class="wrap">
+    <!--empty h2 for where WP notices will appear-->
+    <h2></h2>
+    <div class="media-plus-toolbar wp-filter">
+    <div id="mgmlp-title-area">
+		  <h2 class="mgmlp-title"><?php esc_html_e('Media Library Folders Search Results','maxgalleria-media-library') ?></h2>
+      <div>
+        <p><a href="<?php echo esc_url(site_url() . '/wp-admin/admin.php?page=media-library-folders') ?>">Back to Media Library Folders</a></p>
+        <p><input type="search" placeholder="Search" id="mgmlp-media-search-input" class="search"> <a id="mlfp-media-search-2" class="gray-blue-link" ><?php esc_html_e('Search','maxgalleria-media-library') ?></a></p>            
+      </div>
     
-    echo '</div>' . PHP_EOL;
-		echo '<div style="clear:both;"></div>' . PHP_EOL;
-    echo "<div id='search-instructions'>". __('Click on an image to go to its folder or a on folder to view its contents.','maxgalleria-media-library')."</div>";		
+    </div>
+		<div style="clear:both;"></div>
+    <div id="search-instructions"><?php esc_html_e('Click on an image to go to its folder or a on folder to view its contents.','maxgalleria-media-library') ?></div>
+    <?php
     if ((isset($_GET['s'])) && (strlen(trim($_GET['s'])) > 0)) {
-      $search_string = trim(stripslashes(strip_tags($_GET['s'])));
-      echo "<h4>" . __('Search results for: ','maxgalleria-media-library') . $search_string ."</h4>" . PHP_EOL;			
+      $search_string = trim(sanitize_text_field($_GET['s']));
+      ?>
+      <h4><?php echo esc_html( __('Search results for: ','maxgalleria-media-library') . $search_string) ?></h4>
       
-      echo '<ul class="mg-media-list">' . PHP_EOL;
-            
+      <ul class="mg-media-list">
+      <?php      
       $folder_table = $wpdb->prefix . MAXGALLERIA_MEDIA_LIBRARY_FOLDER_TABLE;
       $sql = $wpdb->prepare("select ID, post_title, $folder_table.folder_id, pm.meta_value as attached_file 
         from $wpdb->prefix" . "posts
@@ -3034,7 +2798,7 @@ AND pm.meta_key = '_wp_attached_file'";
 
       $rows = $wpdb->get_results($sql);
 
-      $class = "media-folder"; 
+      //$class = "media-folder"; 
       if($rows) {
         foreach($rows as $row) {
           $thumbnail = wp_get_attachment_thumb_url($row->ID);
@@ -3042,7 +2806,6 @@ AND pm.meta_key = '_wp_attached_file'";
             $ext = pathinfo($thumbnail, PATHINFO_EXTENSION);
           else {
 						
-            //$image_location = $this->upload_dir['baseurl'] . '/' . $row->attached_file;
 						$baseurl = $this->upload_dir['baseurl'];
 						$baseurl = rtrim($baseurl, '/') . '/';
 						$image_location = $baseurl . ltrim($row->attached_file, '/');
@@ -3051,15 +2814,14 @@ AND pm.meta_key = '_wp_attached_file'";
             $ext = substr($image_location, $ext_pos+1);
             $thumbnail = MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/file.jpg";
           }
-          
-          echo "<li>" . PHP_EOL;
-          echo "   <a class='$class' href='" . site_url() . "/wp-admin/admin.php?page=media-library-folders&media-folder=" . $row->ID . "'><img alt='' src='$thumbnail' /></a>" . PHP_EOL;
-          echo "   <div class='attachment-name'>$row->post_title</div>" . PHP_EOL;
-          echo "</li>" . PHP_EOL;              
-          
+          ?>
+          <li>
+            <a class='media-folder' href='<?php echo esc_url_raw(site_url() . "/wp-admin/admin.php?page=media-library-folders&media-folder=" . $row->ID) ?>'><img alt='<?php echo esc_html($row->post_title)?>' src='<?php echo esc_url($thumbnail) ?>' /></a>
+            <div class='attachment-name'><?php echo esc_html($row->post_title) ?></div>
+          </li>           
+          <?php
         }
       }
-
 
 		$sql = $wpdb->prepare("select ID, post_title, pm.meta_value as attached_file, folder_id from {$wpdb->prefix}posts 
         LEFT JOIN {$wpdb->prefix}mgmlp_folders ON( {$wpdb->prefix}posts.ID = {$wpdb->prefix}mgmlp_folders.post_id) 
@@ -3068,11 +2830,10 @@ AND pm.meta_key = '_wp_attached_file'";
 
       $rows = $wpdb->get_results($sql);
 
-      $class = "media-attachment"; 
+      //$class = "media-attachment"; 
       if($rows) {
         foreach($rows as $row) {
 					
-		      //$image_location = $this->upload_dir['baseurl'] . '/' . $row->attached_file;
 					$baseurl = $this->upload_dir['baseurl'];
 					$baseurl = rtrim($baseurl, '/') . '/';
 					$image_location = $baseurl . ltrim($row->attached_file, '/');
@@ -3087,33 +2848,27 @@ AND pm.meta_key = '_wp_attached_file'";
           }
           
           $filename =  pathinfo($image_location, PATHINFO_BASENAME);
-          
-          echo "<li>" . PHP_EOL;
-          echo "   <a class='$class' href='" . site_url() . "/wp-admin/admin.php?page=media-library-folders&media-folder=" . $row->folder_id . "'><img alt='' src='$thumbnail' /></a>" . PHP_EOL;
-          echo "   <div class='attachment-name'>$filename</div>" . PHP_EOL;
-          echo "</li>" . PHP_EOL;              
+          ?>
+          <li>
+            <a class='media-attachment' href='<?php echo esc_url_raw(site_url() . "/wp-admin/admin.php?page=media-library-folders&media-folder=" . $row->folder_id) ?>'><img alt='<?php echo esc_html($filename) ?>' src='<?php echo esc_url($thumbnail) ?>' /></a>
+            <div class='attachment-name'><?php echo esc_html($filename) ?></div>
+          </li>   
+          <?php
         }      
 
       }
       else {
-        echo __('No files were found matching that name.','maxgalleria-media-library') . PHP_EOL;                      
+        echo esc_html__('No files were found matching that name.','maxgalleria-media-library') . PHP_EOL;                      
       }
-      echo "</ul>" . PHP_EOL;
+      ?>
+        </ul>
+      <?php
     }
-    //echo '  </div>' . PHP_EOL;
-    echo '</div>' . PHP_EOL;    
-    
     ?>
+    </div>
         
       <script>
         
-        
-//      jQuery(document).on("click", "#mgmlp-search-media", function (e) {
-//      //jQuery("#mgmlp-search-media").click(function(){
-//        console.log('click');
-//        do_media_search();
-//      })    
-
       jQuery('#mgmlp-media-search-input').keydown(function (e){
         if(e.keyCode == 13){
           do_media_search();
@@ -3126,10 +2881,10 @@ AND pm.meta_key = '_wp_attached_file'";
                  
       function do_media_search() {
         var search_value = jQuery('#mgmlp-media-search-input').val();
+        
+        var search_url = '<?php echo esc_url_raw(site_url() . '/wp-admin/admin.php?page=search-library&s=') ?>' + search_value;
 
-        var home_url = "<?php echo site_url(); ?>"; 
-
-        window.location.href = home_url + '/wp-admin/admin.php?page=search-library&' + 's=' + search_value;      
+        window.location.href = search_url;        
       }
       </script>          
     <?php
@@ -3140,34 +2895,31 @@ AND pm.meta_key = '_wp_attached_file'";
     global $wpdb, $blog_id, $is_IIS;
     
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
     
     if ((isset($_POST['image_id'])) && (strlen(trim($_POST['image_id'])) > 0))
-      $file_id = trim(stripslashes(strip_tags($_POST['image_id'])));
+      $file_id = trim(sanitize_text_field($_POST['image_id']));
     else
       $file_id = "";
     
     if ((isset($_POST['new_file_name'])) && (strlen(trim($_POST['new_file_name'])) > 0))
-      $new_file_name = trim(stripslashes(strip_tags($_POST['new_file_name'])));
+      $new_file_name = trim(sanitize_text_field($_POST['new_file_name']));
     else
       $new_file_name = "";
     
     if($new_file_name === '') {
-      echo "Invalid file name.";
+      echo esc_html__('Invalid file name.','maxgalleria-media-library');
       die();
     }
     
-		//error_log("new_file_name $new_file_name");
-    //$new_file_name = strtolower($new_file_name);
-    //if(preg_match('/^[a-z0-9-]+\.ext$/', $new_file_name)) {
-    if(preg_match('^[\w,\s-_]+\.[A-Za-z]{3}$^', $new_file_name)) {
-      echo __('Invalid file name.','maxgalleria-media-library');
+    if(preg_match('^[\w,\s\-_]+\.[A-Za-z]{3}$^', $new_file_name)) {
+      echo esc_html__('Invalid file name.','maxgalleria-media-library');
       die();      
     }
           
     if (preg_match("/\\s/", $new_file_name)) {
-			echo __('The file name cannot contain spaces or tabs.','maxgalleria-media-library'); 
+			echo esc_html__('The file name cannot contain spaces or tabs.','maxgalleria-media-library'); 
 			die();            
     }
 		
@@ -3179,19 +2931,13 @@ LEFT JOIN {$wpdb->prefix}postmeta AS pm ON (pm.post_id = {$wpdb->prefix}posts.ID
 where ID = %s
 AND pm.meta_key = '_wp_attached_file'", $file_id);
 
-		
     $row = $wpdb->get_row($sql);
     if($row) {
 			
-      //$image_location = $this->upload_dir['baseurl'] . '/' . $row->attached_file;
       $image_location = $this->build_location_url($row->attached_file);
       
       $alt_text = get_post_meta($file_id, '_wp_attachment_image_alt', true);
-      
-			//$baseurl = $this->upload_dir['baseurl'];
-			//$baseurl = rtrim($baseurl, '/') . '/';
-			//$image_location = $baseurl . ltrim($row->attached_file, '/');
-			
+      			
       $full_new_file_name = $new_file_name . '.' . pathinfo($image_location, PATHINFO_EXTENSION);
       $destination_path = $this->get_absolute_path(pathinfo($image_location, PATHINFO_DIRNAME));
 						
@@ -3204,10 +2950,6 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
 			if(is_multisite()) {
 				$url_slug = "site" . $blog_id . "/";
 				$new_file_url = str_replace($url_slug, "", $new_file_url);
-//				if(strpos($url, 'wp-content') === false)
-//					$url = str_replace($url_slug, "wp-content/uploads/sites/" . $blog_id . "/" , $url);
-//				else
-//					$url = str_replace($url_slug, "", $url);
 			}
 									
       $new_file_path = $this->get_absolute_path($new_file_url);
@@ -3240,13 +2982,7 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
           if(file_exists($thumbnail_file))
             unlink($thumbnail_file);
         }  
-        
-        //foreach (glob($old_file_path) as $source_path) {
-        //  $thumbnail_file = pathinfo($source_path, PATHINFO_BASENAME);
-        //  $thumbnail_destination = $destination_path . DIRECTORY_SEPARATOR . $thumbnail_file;
-        //  unlink($source_path);
-        //}                    
-              
+                      
         $table = $wpdb->prefix . "posts";
         $data = array('guid' => $new_file_url, 
                       'post_title' => $new_file_name,
@@ -3286,7 +3022,6 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
           if(class_exists( 'FLBuilderLoader')) {
 
             $sql = "SELECT ID FROM {$wpdb->prefix}posts WHERE post_content LIKE '%$rename_image_location%'";
-            //error_log($sql);
 
             $records = $wpdb->get_results($sql);
             foreach($records as $record) {
@@ -3324,8 +3059,7 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
           $this->update_elementor_data($file_id, $image_location_no_extension, $new_file_url);          
         }
                 				
-        //echo "<script>window.location.reload(true);</script>";
-				echo __('Updating attachment links, please wait...The file was renamed','maxgalleria-media-library');
+				echo esc_html__('Updating attachment links, please wait...The file was renamed','maxgalleria-media-library');
       }
     }
     
@@ -3339,49 +3073,39 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
   // saves the sort selection
   public function sort_contents() {
     
+    error_log("search_library");
+    
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
       exit(__('missing nonce!','maxgalleria-media-library'));
     } 
     
     if ((isset($_POST['sort_order'])) && (strlen(trim($_POST['sort_order'])) > 0))
-      $sort_order = trim(stripslashes(strip_tags($_POST['sort_order'])));
+      $sort_order = trim(sanitize_text_field($_POST['sort_order']));
     else
       $sort_order = "0";
     
     if ((isset($_POST['folder'])) && (strlen(trim($_POST['folder'])) > 0))
-      $current_folder_id = trim(stripslashes(strip_tags($_POST['folder'])));
+      $current_folder_id = trim(sanitize_text_field($_POST['folder']));
     else
       $current_folder_id = "";
 		        
     update_option( MAXGALLERIA_MEDIA_LIBRARY_SORT_ORDER, $sort_order );  
-    
-    switch ($sort_order) {
-      case '0':
-      $msg = __('Sorting by date.','maxgalleria-media-library');
-      break;  
-    
-      case '1':
-      $msg = __('Sorting by name.','maxgalleria-media-library');
-      break;        
-    }
-    
-    //echo $msg;
-    
+        
 		if($current_folder_id != "") {		
 		  $this->display_folder_contents ($current_folder_id, true);
 		}
-                
+                    
     die();
   }
 	
 	public function mgmlp_move_copy(){
 
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
     
     if ((isset($_POST['move_copy_switch'])) && (strlen(trim($_POST['move_copy_switch'])) > 0))
-      $move_copy_switch = trim(stripslashes(strip_tags($_POST['move_copy_switch'])));
+      $move_copy_switch = trim(sanitize_text_field($_POST['move_copy_switch']));
     else
       $move_copy_switch = 'on';
 				    
@@ -3411,16 +3135,14 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
       
       //find the uploads folder
       $uploads_url = $uploads_path['baseurl'];
-      //$upload_path = $this->get_absolute_path($uploads_url);
 			$upload_path = $uploads_path['basedir'];
       $folder_found = false;
 			
 			//not sure if this is still needed
 			//$this->mlp_remove_slashes();
-      //error_log("upload_path $upload_path");
       
       if(!$noecho)
-        echo __('Scaning for new folders in ','maxgalleria-media-library') . " $upload_path<br>";      
+        echo esc_html( __('Scaning for new folders in ','maxgalleria-media-library') . " $upload_path") . "<br>";      
       $objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($upload_path), RecursiveIteratorIterator::SELF_FIRST, RecursiveIteratorIterator::CATCH_GET_CHILD);
       foreach($objects as $name => $object){
         if(is_dir($name)) {
@@ -3430,8 +3152,6 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
 						
 							// no match, set it back to empty
 							$skip_path = "";
-            //$url = $this->get_file_url($name);
-						//error_log("skip_path $skip_path, name $name");
 						
             if(!is_multisite()) {
 							$upload_pos = strpos($name, $uploads_folder);
@@ -3447,7 +3167,7 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
 		              if(!file_exists($name . DIRECTORY_SEPARATOR . 'mlpp-hidden' )){
 										$folder_found = true;
 										if(!$noecho)
-											echo __('Adding','maxgalleria-media-library') . " $url<br>";
+											echo esc_html( __('Adding','maxgalleria-media-library') . " " . esc_url($url)) . "<br>";
 										$parent_id = $this->find_parent_id($url);
                     if($parent_id)
 										  $this->add_media_folder($dir_name, $parent_id, $url);
@@ -3476,17 +3196,15 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
 		                if(!file_exists($name . DIRECTORY_SEPARATOR . 'mlpp-hidden' )){
 											$folder_found = true;
 											if(!$noecho)
-												echo __('Adding','maxgalleria-media-library') . " $url<br>";
+												echo esc_html( __('Adding','maxgalleria-media-library') . " " . esc_url($url)) . "<br>";
 											$parent_id = $this->find_parent_id($url);
                       if($parent_id)
 											  $this->add_media_folder($dir_name, $parent_id, $url);
 											} else {
 												$skip_path = $name;									
-												//error_log("skip_path $skip_path");
 											}
 										} else {
 											$skip_path = $name;									
-												//error_log("skip_path $skip_path");
 										}
 									}																
 							} else {
@@ -3504,7 +3222,7 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
 												if(!file_exists($name . DIRECTORY_SEPARATOR . 'mlpp-hidden' )){																						
 													$folder_found = true;
 													if(!$noecho)
-														echo __('Adding','maxgalleria-media-library') . " $url<br>";
+														echo esc_html( __('Adding','maxgalleria-media-library') . " " . esc_url($url)) . "<br>";
 													$parent_id = $this->find_parent_id($url);
 											    if($parent_id)
 													  $this->add_media_folder($dir_name, $parent_id, $url);              
@@ -3522,12 +3240,12 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
       }      
       if(!$folder_found) {
         if(!$noecho)
-          echo __('No new folders were found.','maxgalleria-media-library') . "<br>";
+          echo esc_html__('No new folders were found.','maxgalleria-media-library') . "<br>";
       }  
     } 
     else {
       if(!$noecho)
-        echo "error: " . $uploads_path['error'];
+        echo esc_html("error: " . $uploads_path['error']);
     }
   }
 		
@@ -3545,7 +3263,7 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
 		if($this->folder_exist($url) === false) {
 			$folder_found = true;
 			if(!$noecho) {
-				echo __('Adding','maxgalleria-media-library') . " $url<br>";
+				echo esc_html( __('Adding','maxgalleria-media-library') . " " . esc_url($url)) . "<br>";
 			}	
 			$parent_id = $this->find_parent_id($url);
 			if($parent_id)
@@ -3563,7 +3281,6 @@ AND pm.meta_key = '_wp_attached_file'", $file_id);
 		// get the relative path
 		$parent_dir = substr($parent_dir, $this->base_url_length);		
 		
-    //$sql = "select ID from $wpdb->prefix" . "posts where guid = '$parent_dir'";
     $sql = "SELECT ID FROM {$wpdb->prefix}posts
 LEFT JOIN {$wpdb->prefix}postmeta AS pm ON pm.post_id = ID
 WHERE pm.meta_value = '$parent_dir' 
@@ -3618,10 +3335,11 @@ and pm.meta_key = '_wp_attached_file'";
     $current_user_id = get_current_user_id(); 
     
     update_user_meta( $current_user_id, MAXGALLERIA_MLP_REVIEW_NOTICE, "off" );
+        
+    $request = sanitize_url($_SERVER["HTTP_REFERER"]);
     
-    $request = $_SERVER["HTTP_REFERER"];
+    echo "<script>window.location.href = '" . esc_url_raw($request) . "'</script>";             
     
-    echo "<script>window.location.href = '" . $request . "'</script>";             
     
 	}
   
@@ -3631,9 +3349,9 @@ and pm.meta_key = '_wp_attached_file'";
     
     update_user_meta( $current_user_id, MAXGALLERIA_MLP_FEATURE_NOTICE, "off" );
     
-    $request = $_SERVER["HTTP_REFERER"];
+    $request = sanitize_url($_SERVER["HTTP_REFERER"]);
     
-    echo "<script>window.location.href = '" . $request . "'</script>";             
+    echo "<script>window.location.href = '" . esc_url_raw($request) . "'</script>";             
     
 	}
     
@@ -3645,9 +3363,9 @@ and pm.meta_key = '_wp_attached_file'";
         
     update_user_meta( $current_user_id, MAXGALLERIA_MLP_REVIEW_NOTICE, $review_date );
     
-    $request = $_SERVER["HTTP_REFERER"];
+    $request = sanitize_url($_SERVER["HTTP_REFERER"]);
     
-    echo "<script>window.location.href = '" . $request . "'</script>";             
+    echo "<script>window.location.href = '" . esc_url_raw($request) . "'</script>";             
     
 	}
   
@@ -3655,11 +3373,11 @@ and pm.meta_key = '_wp_attached_file'";
     if( current_user_can( 'manage_options' ) ) {  ?>
       <div class="updated notice maxgalleria-mlp-notice">         
         <div id='mlp_logo'></div>
-        <div id='maxgalleria-mlp-notice-3'><p id='mlp-notice-title'><?php _e( 'Is there a feature you would like for us to add to<br>Media Library Folders Pro? Let us know.', 'maxgalleria-media-library' ); ?></p>
-        <p><?php _e( 'Send your suggestions to <a href="mailto:support@maxfoundry.com">support@maxfoundry.com</a>.', 'maxgalleria-media-library' ); ?></p>
+        <div id='maxgalleria-mlp-notice-3'><p id='mlp-notice-title'><?php esc_html_e('Is there a feature you would like for us to add to', 'maxgalleria-media-library' ); ?><br><?php esc_html_e('Media Library Folders Pro? Let us know.', 'maxgalleria-media-library' ); ?></p>
+        <p><?php esc_html_e('Send your suggestions to', 'maxgalleria-media-library' ); ?> <a href="mailto:support@maxfoundry.com">support@maxfoundry.com</a>.</p>
 
         </div>
-        <a class="dashicons dashicons-dismiss close-mlp-notice" href="<?php echo admin_url(); ?>admin.php?page=mlp-feature-notice"></a>          
+        <a class="dashicons dashicons-dismiss close-mlp-notice" href="<?php echo esc_url_raw(admin_url() . "admin.php?page=mlp-feature-notice") ?>"></a>          
       </div>
     <?php     
     }
@@ -3669,38 +3387,21 @@ and pm.meta_key = '_wp_attached_file'";
     if( current_user_can( 'manage_options' ) ) {  ?>
       <div class="updated notice maxgalleria-mlp-notice">         
         <div id='mlp_logo'></div>
-        <div id='maxgalleria-mlp-notice-3'><p id='mlp-notice-title'><?php _e( 'Rate us Please!', 'maxgalleria-media-library' ); ?></p>
-        <p><?php _e( 'Your rating is the simplest way to support Media Library Folders Pro. We really appreciate it!', 'maxgalleria-media-library' ); ?></p>
+        <div id='maxgalleria-mlp-notice-3'><p id='mlp-notice-title'><?php esc_html_e( 'Rate us Please!', 'maxgalleria-media-library' ); ?></p>
+        <p><?php esc_html_e( 'Your rating is the simplest way to support Media Library Folders Pro. We really appreciate it!', 'maxgalleria-media-library' ); ?></p>
 
         <ul id="mlp-review-notice-links">
-          <li> <span class="dashicons dashicons-smiley"></span><a href="<?php echo admin_url(); ?>admin.php?page=mlp-review-notice"><?php _e( "I've already left a review", "maxgalleria-media-library" ); ?></a></li>
-          <li><span class="dashicons dashicons-calendar-alt"></span><a href="<?php echo admin_url(); ?>admin.php?page=mlp-review-later"><?php _e( "Maybe Later", "maxgalleria-media-library" ); ?></a></li>
-          <li><span class="dashicons dashicons-external"></span><a target="_blank" href="https://wordpress.org/support/plugin/media-library-plus/reviews/?filter=5"><?php _e( "Sure! I'd love to!", "maxgalleria-media-library" ); ?></a></li>
+          <li> <span class="dashicons dashicons-smiley"></span><a href="<?php echo esc_url_raw( admin_url() . "admin.php?page=mlp-review-notice") ?>"><?php esc_html_e( "I've already left a review", "maxgalleria-media-library" ); ?></a></li>
+          <li><span class="dashicons dashicons-calendar-alt"></span><a href="<?php echo esc_url_raw( admin_url() . "admin.php?page=mlp-review-later") ?>"><?php esc_html_e( "Maybe Later", "maxgalleria-media-library" ); ?></a></li>
+          <li><span class="dashicons dashicons-external"></span><a target="_blank" href="https://wordpress.org/support/plugin/media-library-plus/reviews/?filter=5"><?php esc_html_e( "Sure! I'd love to!", "maxgalleria-media-library" ); ?></a></li>
         </ul>
         </div>
-        <a class="dashicons dashicons-dismiss close-mlp-notice" href="<?php echo admin_url(); ?>admin.php?page=mlp-review-notice"></a>          
+        <a class="dashicons dashicons-dismiss close-mlp-notice" href="<?php echo esc_url_raw( admin_url() . "admin.php?page=mlp-review-notice") ?>"></a>          
       </div>
     <?php     
     }
   }
-  			
-  public function check_for_attachment_id($guid, $post_id) {	
-		global $blog_id;
-		
-		$attach_id_found = strpos($guid, 'attachment_id=');
-		if($attach_id_found !== false)
-			$location = wp_get_attachment_url($post_id);
-		else
-			$location = $guid;
-						
-//		if(is_multisite()) {
-//			$url_slug = 'site' . $blog_id . '/';
-//			$location = str_replace($location, $url_slug, "");			
-//			return $location;
-//		} else
-			return $location;
-	}
-  
+  			  
 	public function max_sync_contents($parent_folder) {
     
     global $wpdb;
@@ -3724,7 +3425,7 @@ and pm.meta_key = '_wp_attached_file'";
 		$uploads_url = $this->upload_dir['baseurl'];
 		$upload_path = $this->upload_dir['basedir'];
 
-		$folders_to_hide = explode("\n", file_get_contents( MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_DIR .'/folders_to_hide.txt'));
+		$folders_to_hide = explode("\n", file_get_contents( esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_DIR .'/folders_to_hide.txt')));
 		
     $sql = "select meta_value as attached_file
 from {$wpdb->prefix}postmeta
@@ -3736,9 +3437,7 @@ and meta_key = '_wp_attached_file'";
 		$baseurl = rtrim($uploads_url, '/') . '/';
 		
 		if(!is_multisite()) {
-			//error_log("baseurl $baseurl");
 			$image_location = $baseurl . ltrim($current_row->attached_file, '/');
-		  //error_log("image_location $image_location");
       $folder_path = $this->get_absolute_path($image_location);
 		} else {
       $folder_path = $this->get_absolute_path($baseurl);		
@@ -3781,8 +3480,6 @@ and meta_key = '_wp_attached_file'";
 									$folders_found = true;
 									$parent_id = $this->find_parent_id($url);
 									$last_new_folder_id = $this->add_media_folder($dir_name, $parent_id, $url);
-									//$last_new_folder_id++;
-									//error_log("folder added: $name");
 									$files_added++;								
 									} else {
 										$skip_path = $name;
@@ -3808,13 +3505,11 @@ and meta_key = '_wp_attached_file'";
 
 							  $existing_folder_id = $this->folder_exist($url);
 								if($existing_folder_id === false) {
-									//error_log("folder id: $existing_folder_id");
 									if(!in_array($dir_name, $folders_to_hide)) {
 										if(!file_exists($name . DIRECTORY_SEPARATOR . 'mlpp-hidden' )){
 											$folders_found = true;
 											$parent_id = $this->find_parent_id($url);
 											$last_new_folder_id = $this->add_media_folder($dir_name, $parent_id, $url);
-											//error_log("folder added: $name");
 											$files_added++;								
 										} else {
 											$skip_path = $name;
@@ -3828,21 +3523,15 @@ and meta_key = '_wp_attached_file'";
 							} else {
 								if(strpos($name,"uploads/sites/$blog_id") !== false) {
 									
-									//error_log("");
-									//error_log("name $name");
-									
 									$upload_pos = strpos($name, $uploads_folder);
-									//error_log("$uploads_folder, upload_pos $upload_pos");
 																		
 									$url = $uploads_url . substr($name, ($upload_pos+$uploads_length));
-									//error_log("uploads_url $uploads_url");
 
 									// fix slashes if running windows
                   if ($is_IIS || strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' || strtoupper(substr(PHP_OS, 0, 13)) == 'MICROSOFT-IIS' ) {
 										$url = str_replace('\\', '/', $url);      
 									}
 									$existing_folder_id = $this->folder_exist($url);
-									//error_log("folder id: $existing_folder_id");
 									if($existing_folder_id === false) {
 										$folders_found = true;
 										$parent_id = $this->find_parent_id($url);
@@ -3907,10 +3596,8 @@ and meta_key = '_wp_attached_file'";
         //error_log("$current_file_path $file_path");
 				if($current_file_path === $file_path) {
 					$found = true;
-          //error_log("found");
 					break;
 				} else {
-          //error_log("not found");          
         }
       }			
     }
@@ -3928,9 +3615,10 @@ and meta_key = '_wp_attached_file'";
 			}
 		}
   }
-		
 	
 	public function mlp_load_folder() {
+    
+    error_log("mlp_load_folder");
 		
     global $wpdb;
 		
@@ -3939,7 +3627,7 @@ and meta_key = '_wp_attached_file'";
     }
     
     if ((isset($_POST['folder'])) && (strlen(trim($_POST['folder'])) > 0))
-      $current_folder_id = trim(stripslashes(strip_tags($_POST['folder'])));
+      $current_folder_id = trim(sanitize_textarea_field($_POST['folder']));
     else
       $current_folder_id = "";
     
@@ -3959,7 +3647,7 @@ and meta_key = '_wp_attached_file'";
 			if($folder_counter === $folder_count)
 				$folders_path .= $obj['name'];      
 			else
-				$folders_path .= '<a folder="' . $obj['id'] . '" class="media-link">' . $obj['name'] . '</a>/';      
+				$folders_path .= '<a folder="' . $obj['id'] . '\' class="media-link\'>' . $obj['name'] . '</a>/';      
 			$current_folder_string .= '/' . $obj['name'];
 		}
 		
@@ -3977,46 +3665,46 @@ and meta_key = '_wp_attached_file'";
     <div class="container">
       <div class="row">
         <div class="width-50">
-          <h1>Media Library Folders: Update to PRO</h1>
-          <a href="<?php echo UPGRADE_TO_PRO_LINK; ?>" class="big-pluspro-btn">Buy Now</a>
-          <a class="simple-btn block" href="https://maxgalleria.com/media-library-plus/">Click here to learn about the Media Library Folders</a>
+          <h1><?php esc_html_e('Media Library Folders: Update to PRO','maxgalleria-media-library') ?></h1>
+          <a href="<?php echo esc_url(UPGRADE_TO_PRO_LINK); ?>" class="big-pluspro-btn"><?php esc_html_e('Buy Now','maxgalleria-media-library') ?></a>
+          <a class="simple-btn block" href="<?php echo esc_url("https://maxgalleria.com/media-library-plus/") ?>"><?php esc_html_e('Click here to learn about the Media Library Folders','maxgalleria-media-library') ?></a>
         </div>
         <div class="width-50">
           <strong>
-            <i>Brought to you by <img src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/logo-mf.png" alt="logo" /><br>Upgrade to Media Library Folders Pro today! <a class="simple-btn" href="<?php echo UPGRADE_TO_PRO_LINK; ?>">Click Here</a></i>
+            <i><?php esc_html_e('Brought to you by','maxgalleria-media-library') ?> <img src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/logo-mf.png") ?>" alt="logo" /><br><?php esc_html_e('Upgrade to Media Library Folders Pro today!','maxgalleria-media-library') ?> <a class="simple-btn" href="<?php echo esc_url(UPGRADE_TO_PRO_LINK) ?>"><?php esc_html_e('Click Here','maxgalleria-media-library') ?></a></i>
           </strong>
         </div>
         <div class="mlf-clearfix"></div>
       </div>
     </div>
-		<img id="mlpp-logo" alt="Media Library Folders Pro Logo" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/mlfp.png" width="235" height="235" >
+		<img id="mlpp-logo" alt="Media Library Folders Pro Logo" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ."/images/mlfp.png") ?>" width="235" height="235" >
   </div>
   
   <div class="section features-section">
     <div class="features">
       <div class="container">
-        <h2>Features</h2>
+        <h2><?php esc_html_e('Features','maxgalleria-media-library') ?></h2>
         <div class="row">
           <div class="width-50">
             <ul>
-              <li><span>Add images to your posts and pages</span></li>
-              <li><span>File Name View Mode</span></li>
-              <li><span>Thumbnail Management</span></li>							
-              <li><span>Add Images to WooCommerce Product Gallery</span></li>							
-              <li><span>Export the media library from one Wordpress site and import it into another</span></li>
-              <li><span>Front End Upload to a Specific Folder</span></li>							
-              <li><span>Bulk Move of media files</span></li>							
+              <li><span><?php esc_html_e('Add images to your posts and pages','maxgalleria-media-library') ?></span></li>
+              <li><span><?php esc_html_e('File Name View Mode','maxgalleria-media-library') ?></span></li>
+              <li><span><?php esc_html_e('Thumbnail Management','maxgalleria-media-library') ?></span></li>							
+              <li><span><?php esc_html_e('Add Images to WooCommerce Product Gallery','maxgalleria-media-library') ?></span></li>							
+              <li><span><?php esc_html_e('Export the media library from one Wordpress site and import it into another','maxgalleria-media-library') ?></span></li>
+              <li><span><?php esc_html_e('Front End Upload to a Specific Folder','maxgalleria-media-library') ?></span></li>							
+              <li><span><?php esc_html_e('Bulk Move of media files','maxgalleria-media-library') ?></span></li>							
             </ul>
           </div>
           <div class="width-50">
             <ul>
-              <li><span>Organize Nextgen Galleries</span></li>
-              <li><span>Supports Advanced Custom Fields</span></li>
-              <li><span>Multisite Supported</span></li>
-              <li><span>Category Interchangability with Enhanced Media Library</span></li>							
-              <li><span>Embed PDF files in a page via a shortcode and Embed PDF file shortcode generator</span></li>							
-              <li><span>Media Library Maintenance and Bulk File Import</span></li>							
-              <li><span>Jetpack and the Wordpress Gallery Shortcode Generator</span></li>
+              <li><span><?php esc_html_e('Organize Nextgen Galleries','maxgalleria-media-library') ?></span></li>
+              <li><span><?php esc_html_e('Supports Advanced Custom Fields','maxgalleria-media-library') ?></span></li>
+              <li><span><?php esc_html_e('Multisite Supported','maxgalleria-media-library') ?></span></li>
+              <li><span><?php esc_html_e('Category Interchangability with Enhanced Media Library','maxgalleria-media-library') ?></span></li>							
+              <li><span><?php esc_html_e('Embed PDF files in a page via a shortcode and Embed PDF file shortcode generator','maxgalleria-media-library') ?></span></li>							
+              <li><span><?php esc_html_e('Media Library Maintenance and Bulk File Import','maxgalleria-media-library') ?></span></li>							
+              <li><span><?php esc_html_e('Jetpack and the Wordpress Gallery Shortcode Generator','maxgalleria-media-library') ?></span></li>
             </ul>
           </div>
           <div class="mlf-clearfix"></div>
@@ -4031,14 +3719,14 @@ and meta_key = '_wp_attached_file'";
       <div class="prices">
         <h3>$49</h3>
         <div class="descr">
-          <img src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/icons/benefits.png" class=" img-responsive" alt="ico">
-          <p>
-            Includes 1 Year Support
-            <br>
-            and Updates
+          <img src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/icons/benefits.png") ?>" class=" img-responsive" alt="ico">
+          <p>            
+            <?php esc_html_e('Includes 1 Year Support','maxgalleria-media-library') ?>
+            <br>           
+            <?php esc_html_e('and Updates','maxgalleria-media-library') ?>
           </p>
         </div>
-        <a href="<?php echo UPGRADE_TO_PRO_LINK; ?>" class="text-uppercase big-pluspro-btn">Buy MLFP</a>
+        <a href="<?php echo esc_url(UPGRADE_TO_PRO_LINK) ?>" class="text-uppercase big-pluspro-btn">Buy MLFP</a>
       </div>
     </div>
   </div>
@@ -4050,52 +3738,18 @@ and meta_key = '_wp_attached_file'";
           <div class="width-100">
             
             <p class="mflp-into">
-              MLF Pro integrates with post and page editor pages to let you select <br>and add images to your posts and pages for the editor.
+              <?php esc_html_e('MLF Pro integrates with post and page editor pages to let you select <br>and add images to your posts and pages for the editor.','maxgalleria-media-library') ?>
             </p>            
             <h4>
-              Add Images to Your Posts and Pages
+              <?php esc_html_e('Add Images to Your Posts and Pages','maxgalleria-media-library') ?>
             </h4>
             <p>
-              Media Library Folders Pro helps you organize your WordPress Media Library including functions for using and managing your files and images, thubnails, image categorizes and media library maintenance.
+              <?php esc_html_e('Media Library Folders Pro helps you organize your WordPress Media Library including functions for using and managing your files and images, thubnails, image categorizes and media library maintenance.','maxgalleria-media-library') ?>
             </p>
             <p>
-              Media Library Folders Pro lets you create MaxGalleria and NextGEN Galleries directly from your MLF folders. This is where your images are so it is a logical place to select them and build your Gallery.
+              <?php esc_html_e('Media Library Folders Pro lets you create MaxGalleria and NextGEN Galleries directly from your MLF folders. This is where your images are so it is a logical place to select them and build your Gallery.','maxgalleria-media-library') ?>
             </p>
-            <img class="img-responsive" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/new-add-images.png" alt="img" />
-          </div>
-        </div>
-      </div>
-    </div>
-<!--    <div class="option">
-      <div class="container">
-        <div class="row">
-          <div class="width-100">
-            <h4>
-              Jetpack and The WordPress Gallery Integration
-            </h4>
-            <p>
-              MLFP includes an integration with The WordPress Gallery which ships with the core of WordPress.  Our integration lets you create a gallery from your post and page editor.
-            </p>
-            <img class="img-responsive" src="< ?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/jetpack.png" alt="img" />
-          </div>
-        </div>
-      </div>
-    </div>-->
-
-    <div class="option">
-      <div class="container">
-        <div class="row">
-          <div class="width-100">
-            <h4>
-              File Name View Mode
-            </h4>
-            <p>
-              When you are dealing with large image libraries the wait time can be quite long in WordPress Media Library.  In order to speed the process of image selection we have built a file name view mode options into Media Library Folders Pro.
-            </p>
-            <p>
-              This mode let’s you see all of the file names in a folder quickly and then click on specific files to see their images.
-            </p>
-            <img class="img-responsive" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/file-name.png" alt="img" />
+            <img class="img-responsive" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/assets/new-add-images.png") ?>" alt="img" />
           </div>
         </div>
       </div>
@@ -4106,12 +3760,31 @@ and meta_key = '_wp_attached_file'";
         <div class="row">
           <div class="width-100">
             <h4>
-             Thumbnail Management 
+              <?php esc_html_e('File Name View Mode','maxgalleria-media-library') ?>
             </h4>
             <p>
-             Reduce the number of image thumbnail files generated by WordPress.
+              <?php esc_html_e('When you are dealing with large image libraries the wait time can be quite long in WordPress Media Library.  In order to speed the process of image selection we have built a file name view mode options into Media Library Folders Pro.','maxgalleria-media-library') ?>
             </p>
-            <img class="img-responsive" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/thumbnail-management.png" alt="img" />
+            <p>
+              <?php esc_html_e('This mode let\’s you see all of the file names in a folder quickly and then click on specific files to see their images.','maxgalleria-media-library') ?>
+            </p>
+            <img class="img-responsive" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/assets/file-name.png") ?>" alt="img" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="option">
+      <div class="container">
+        <div class="row">
+          <div class="width-100">
+            <h4>
+             <?php esc_html_e('Thumbnail Management','maxgalleria-media-library') ?>
+            </h4>
+            <p>
+             <?php esc_html_e('Reduce the number of image thumbnail files generated by WordPress.','maxgalleria-media-library') ?>
+            </p>
+            <img class="img-responsive" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/assets/thumbnail-management.png") ?>" alt="img" />
           </div>
         </div>
       </div>
@@ -4122,15 +3795,15 @@ and meta_key = '_wp_attached_file'";
         <div class="row">
           <div class="width-100">
             <h4>
-              Media Library Maintenance
+              <?php esc_html_e('Media Library Maintenance','maxgalleria-media-library') ?>
             </h4>
             <p>
-              Over time a site's media library often builds up a number of unneeded files, especially auto generated extra thumbnail file sizes that are no longer necessary due to theme or plugin changes or perhaps multiple thumbnail regenerations. 
+              <?php esc_html_e('Over time a site\'s media library often builds up a number of unneeded files, especially auto generated extra thumbnail file sizes that are no longer necessary due to theme or plugin changes or perhaps multiple thumbnail regenerations.','maxgalleria-media-library') ?>
             </p>
             <p>
-              Media Library Maintenance allows site administrators to find, view and remove or import these uncatalogued files.
+              <?php esc_html_e('Media Library Maintenance allows site administrators to find, view and remove or import these uncatalogued files.','maxgalleria-media-library') ?>
             </p>
-            <img class="img-responsive" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/maintenance.png" alt="img" />
+            <img class="img-responsive" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/assets/maintenance.png") ?>" alt="img" />
           </div>
         </div>
       </div>
@@ -4141,10 +3814,10 @@ and meta_key = '_wp_attached_file'";
         <div class="row">
           <div class="width-100">
             <h4>
-               Bulk File Import
+               <?php esc_html_e('Bulk File Import','maxgalleria-media-library') ?>
             </h4>
             <p>
-              Our Media Library Maintenance feature makes it easy to bulk import images and files into the Media Library.  
+              <?php esc_html_e('Our Media Library Maintenance feature makes it easy to bulk import images and files into the Media Library.','maxgalleria-media-library') ?>
             </p>
           </div>
         </div>
@@ -4156,12 +3829,12 @@ and meta_key = '_wp_attached_file'";
         <div class="row">
           <div class="width-100">
             <h4>
-             Assign and Group Images by Categories
+             <?php esc_html_e('Assign and Group Images by Categories','maxgalleria-media-library') ?>
             </h4>
             <p>
-              Media Library Folders Pro implements image categories which are compatible with categories created by the Enhanced Media Library plugin.
+              <?php esc_html_e('Media Library Folders Pro implements image categories which are compatible with categories created by the Enhanced Media Library plugin.','maxgalleria-media-library') ?>
             </p>
-            <img class="img-responsive" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/image-categories.png" alt="img" />
+            <img class="img-responsive" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/assets/image-categories.png") ?> alt="img" />
           </div>
         </div>
       </div>
@@ -4177,7 +3850,7 @@ and meta_key = '_wp_attached_file'";
             <p>
               The Import/Export feature allows an administrator to export a sites media library from one site to another. 
             </p>
-            <img class="img-responsive" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/import-export.png" alt="img" />
+            <img class="img-responsive" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/assets/import-export.png") ?>" alt="img" />
           </div>
         </div>
       </div>
@@ -4188,15 +3861,15 @@ and meta_key = '_wp_attached_file'";
         <div class="row">
           <div class="width-100">
             <h4>
-             File Replacement
+             <?php esc_html_e('File Replacement','maxgalleria-media-library') ?>
             </h4>
             <p>
-              Replace an existing file with another one of the same type in the Media Library
+              <?php esc_html_e('Replace an existing file with another one of the same type in the Media Library','maxgalleria-media-library') ?>
             </p>
             <p>
-              You can export and download the contents of your media library from one WordPress site and then upload and import it into the media library of another WordPress site. 
+              <?php esc_html_e('You can export and download the contents of your media library from one WordPress site and then upload and import it into the media library of another WordPress site.','maxgalleria-media-library') ?> 
             </p>
-            <img class="img-responsive" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/file-replacement.png" alt="img" />
+            <img class="img-responsive" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/assets/file-replacement.png") ?>" alt="img" />
           </div>
         </div>
       </div>
@@ -4207,15 +3880,15 @@ and meta_key = '_wp_attached_file'";
         <div class="row">
           <div class="width-100">
             <h4>
-             Frontend Upload
+             <?php esc_html_e('Frontend Upload','maxgalleria-media-library') ?>
             </h4>
             <p>
-              Frontend uploading of files is available via a shortcode.
+              <?php esc_html_e('Frontend uploading of files is available via a shortcode.','maxgalleria-media-library') ?>
             </p>
             <p>
-              Allows your signed in users to upload files to specified folders without needing to grant them access to your dashboard or media library.
+              <?php esc_html_e('Allows your signed in users to upload files to specified folders without needing to grant them access to your dashboard or media library.','maxgalleria-media-library') ?>
             </p>
-            <img class="img-responsive" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/frontend-upload.png" alt="img" />
+            <img class="img-responsive" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/assets/frontend-upload.png") ?>" alt="img" />
           </div>
         </div>
       </div>
@@ -4226,12 +3899,12 @@ and meta_key = '_wp_attached_file'";
         <div class="row">
           <div class="width-100">
             <h4>
-             Embed PDF, Audio or Video Files
+             <?php esc_html_e('Embed PDF, Audio or Video Files','maxgalleria-media-library') ?>
             </h4>
             <p>
-              Media Library Folders Pro allows the embedding of PDF, audio or video files into posts and pages via a shortcode and a builtin embed file shortcode genreator.
+              <?php esc_html_e('Media Library Folders Pro allows the embedding of PDF, audio or video files into posts and pages via a shortcode and a builtin embed file shortcode genreator.','maxgalleria-media-library') ?>
             </p>
-            <img class="img-responsive" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/embed-file.png" alt="img" />
+            <img class="img-responsive" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/assets/embed-file.png") ?>" alt="img" />
           </div>
         </div>
       </div>
@@ -4242,12 +3915,12 @@ and meta_key = '_wp_attached_file'";
         <div class="row">
           <div class="width-100">
             <h4>
-             Create Audio and Video Playlists
+             <?php esc_html_e('Create Audio and Video Playlists','maxgalleria-media-library') ?>
             </h4>
             <p>
-              Use Media Library Folders Pro's playlist shortcode generator to create your own audio or video playlists.
+              <?php esc_html_e('Use Media Library Folders Pro\'s playlist shortcode generator to create your own audio or video playlists.','maxgalleria-media-library') ?>
             </p>
-            <img class="img-responsive" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/audio-playlist-generator.png" alt="img" />
+            <img class="img-responsive" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/assets/audio-playlist-generator.png") ?>" alt="img" />
           </div>
         </div>
       </div>
@@ -4258,12 +3931,12 @@ and meta_key = '_wp_attached_file'";
         <div class="row">
           <div class="width-100">
             <h4>
-              NextGEN Galleries
+              <?php esc_html_e('NextGEN Galleries','maxgalleria-media-library') ?>
             </h4>
             <p>
-              Media Library Folders Pro lets you create a NextGEN gallery from the Media Library Pro Plus directory. We recommend using this capability when creating new NextGEN galleries.
+              <?php esc_html_e('Media Library Folders Pro lets you create a NextGEN gallery from the Media Library Pro Plus directory. We recommend using this capability when creating new NextGEN galleries.','maxgalleria-media-library') ?>
             </p>
-            <img class="img-responsive" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/assets/nextgen.png" alt="img" />
+            <img class="img-responsive" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/assets/nextgen.png") ?>" alt="img" />
           </div>
         </div>
       </div>
@@ -4275,9 +3948,9 @@ and meta_key = '_wp_attached_file'";
   <div class="section options-section last-section">
     <div class="container">
       <h4>
-        Get Media Library Folders Pro
+        <?php esc_html_e('Get Media Library Folders Pro','maxgalleria-media-library') ?>
       </h4>
-      <a href="<?php echo UPGRADE_TO_PRO_LINK; ?>" class="text-uppercase big-pluspro-btn">Get MLF Pro</a>
+      <a href="<?php echo esc_url(UPGRADE_TO_PRO_LINK) ?>" class="text-uppercase big-pluspro-btn"><?php esc_html_e('Get MLF Pro','maxgalleria-media-library') ?></a>
     </div>
   </div>
 </div>			
@@ -4328,7 +4001,7 @@ and meta_key = '_wp_attached_file'";
 	public function mlpp_hide_template_ad() {
 		
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(esc_html__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
 		
     update_option('mlpp_show_template_ad', "off");
@@ -4342,30 +4015,26 @@ and meta_key = '_wp_attached_file'";
 		?>	
 		
 		<div styel="clear:both"></div>
-		<h1><?php _e('Media Library Folders Settings', 'maxgalleria-media-library'); ?></h1>
+		<h1><?php esc_html_e('Media Library Folders Settings', 'maxgalleria-media-library'); ?></h1>
 		
 		<?php
-    //$disable_ft = get_user_meta( $current_user->ID, MAXGALLERIA_MLP_DISABLE_FT, true );		
-    $this->disable_scaling = get_option( MAXGALLERIA_DISABLE_SCALLING, 'off');
-		$images_pre_page = get_option(MAXGALLERIA_MLP_ITEMS_PRE_PAGE, '500');
-?>
-		
-<!--		<p>
-			<input type="checkbox" name="disable_floating_filetree" id="disable_floating_filetree" value="" <?php //checked($disable_ft, 'on') ?>>
-			<label><?php  //_e('Disable floating file tree', 'maxgalleria-media-library'); ?></label>
-		</p>-->
-    
+      $this->disable_scaling = get_option( MAXGALLERIA_DISABLE_SCALLING, 'off');
+      $images_pre_page = get_option(MAXGALLERIA_MLP_ITEMS_PRE_PAGE, '500');
+      if($images_pre_page == '')
+        $images_pre_page = 100;
+    ?>
+		    
 		<p>
-			<label><?php  _e('Number of images to display:', 'maxgalleria-media-library'); ?></label>
-			<input type="text" id="images-pre-page" name="images-pre-page" value="<?php echo $images_pre_page ?>" style="width: 50px">
+			<label><?php esc_html_e('Number of images to display:', 'maxgalleria-media-library'); ?></label>
+			<input type="text" id="images-pre-page" name="images-pre-page" value="<?php echo esc_attr($images_pre_page) ?>" style="width: 50px" autocomplete=off>
 		</p>
     
 		<p>
-			<input type="checkbox" name="disable_scaling" id="disable_scaling" value="" <?php checked($this->disable_scaling, 'on') ?>>
-			<label><?php  _e('Disable large image scaling', 'maxgalleria-media-library'); ?></label>			
+			<input type="checkbox" name="disable_scaling" id="disable_scaling" value="" <?php esc_attr(checked($this->disable_scaling, 'on')) ?>>
+			<label><?php esc_html_e('Disable large image scaling', 'maxgalleria-media-library'); ?></label>			
 		</p>    
 		<p>
-      <a class="button-primary" id="mlfp-update-settings"><?php _e('Update Settings','maxgalleria-media-library'); ?></a>			
+      <a class="button-primary" id="mlfp-update-settings"><?php esc_html_e('Update Settings','maxgalleria-media-library'); ?></a>			
 		</p>
         
 		<div id="saving-message"></div>
@@ -4373,30 +4042,7 @@ and meta_key = '_wp_attached_file'";
 		
 <script>
 	jQuery(document).ready(function(){
-		
-		//jQuery("#disable_floating_filetree").click(function () {
-    jQuery(document).on("click", "#disable_floating_filetree", function () {
-			
-      var filetree_status = jQuery(this).is(":checked");
-			jQuery("#saving-message").html('');
-			
-			jQuery.ajax({
-				type: "POST",
-				async: true,
-				data: { action: "set_floating_filetree", filetree_status: filetree_status, nonce: mgmlp_ajax.nonce },
-				url: mgmlp_ajax.ajaxurl,
-				dataType: "html",
-				success: function (data) { 
-					jQuery("#saving-message").html(data);
-				},
-				error: function (err){ 
-					jQuery("#gi-ajax-loader").hide();
-					alert(err.responseText)
-				}
-			});
-						
-		});
-    
+		    
     jQuery(document).on("click","#mlfp-update-settings",function(){
       
 			var images_per_page = jQuery("#images-pre-page").val();
@@ -4412,6 +4058,7 @@ and meta_key = '_wp_attached_file'";
 				dataType: "html",
 				success: function (data) { 
 					jQuery("#saving-message").html(data);
+          window.location.reload();                    
 				},
 				error: function (err){ 
 					jQuery("#gi-ajax-loader").hide();
@@ -4426,24 +4073,23 @@ and meta_key = '_wp_attached_file'";
 		
 		<?php 
 	}
-
 			
 	public function regen_mlp_thumbnails() {
+    
+    error_log("regen_mlp_thumbnails");
 		
     global $wpdb, $is_IIS;
         
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit( esc_html__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
 		    
     if ((isset($_POST['serial_image_ids'])) && (strlen(trim($_POST['serial_image_ids'])) > 0))
-      $image_ids = trim(stripslashes(strip_tags($_POST['serial_image_ids'])));
+      $image_ids = trim(sanitize_text_field($_POST['serial_image_ids']));
     else
       $image_ids = "";
 				        
     $image_ids = str_replace('"', '', $image_ids);    
-    
-    //error_log("image_ids $image_ids");
     
     $image_ids = explode(',', $image_ids);
 		
@@ -4482,11 +4128,11 @@ and meta_key = '_wp_attached_file'";
 
 				// check for errors
 				if (is_wp_error($metadata)) {
-					echo __('Error: ','maxgalleria-media-library') . "$base_name ". $metadata->get_error_message();
+					echo esc_html__('Error: ','maxgalleria-media-library') . "$base_name ". $metadata->get_error_message();
 					continue;
 				}	
 				if(empty($metadata)) {
-					printf(__('Unknown error with %s','maxgalleria-media-library'), $base_name);
+					printf( esc_html__('Unknown error with %s','maxgalleria-media-library'), $base_name);
 					continue;
 				}	
 
@@ -4497,7 +4143,7 @@ and meta_key = '_wp_attached_file'";
 			}		
 		}
 				
-    printf( __('Thumbnails have been regenerated for %d image(s)','maxgalleria-media-library'), $counter);		
+    printf( esc_html__('Thumbnails have been regenerated for %d image(s)','maxgalleria-media-library'), $counter);		
 		die();
 	}
   
@@ -4517,7 +4163,6 @@ and meta_key = '_wp_attached_file'";
     if(isset($metadata['sizes'])) {
       foreach($metadata['sizes'] as $source_path) {
         $thumbnail_file = $image_path . DIRECTORY_SEPARATOR . $source_path['file'];
-        //error_log("removing thumbnail_file $thumbnail_file");
 
         if ($is_IIS || strtoupper(substr(PHP_OS, 0, 3)) == 'WIN' || strtoupper(substr(PHP_OS, 0, 13)) == 'MICROSOFT-IIS' )
           $thumbnail_file = str_replace('/', '\\', $thumbnail_file);
@@ -4530,27 +4175,35 @@ and meta_key = '_wp_attached_file'";
   
   public function regenerate_interface() {
 		global $wpdb;
+    
+    $allowed_html = array(
+      'a' => array(
+        'href' => array(),
+        'id' => array()
+      )    
+    );                  
+    
 
 		?>
 
       <div id="message" class="updated fade" style="display:none"></div>
 
       <div id="wp-media-grid" class="wrap">                
-        <!--empty h2 for where WP notices will appear--> 
+        <!--empty h1 for where WP notices will appear--> 
 				<h1></h1>
         <div class="media-plus-toolbar"><div class="media-toolbar-secondary">  
             
 				<div id="mgmlp-header">		
 					<div id='mgmlp-title-area'>
-						<h2 class='mgmlp-title'><?php _e('Regenerate Thumbnails', 'maxgalleria-media-library' ); ?></h2>  
+						<h2 class='mgmlp-title'><?php esc_html_e('Regenerate Thumbnails', 'maxgalleria-media-library' ); ?></h2>  
 
 					</div> <!-- mgmlp-title-area -->
 					<div id="new-top-promo">
-						<a id="mf-top-logo" target="_blank" href="http://maxfoundry.com"><img alt="maxfoundry logo" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/mf-logo.png" width="140" height="25" ></a>
-						<p class="center-text"><?php _e('Makers of', 'maxgalleria-media-library' ); ?> <a target="_blank"  href="http://maxbuttons.com/">MaxButtons</a>, <a target="_blank" href="http://maxbuttons.com/product-category/button-packs/">WordPress Buttons</a> <?php _e('and', 'maxgalleria-media-library' ); ?> <a target="_blank" href="http://maxgalleria.com/">MaxGalleria</a></p>						
-				    <p class="center-text-no-ital"><?php _e('Click here to', 'maxgalleria-media-library' ); ?> <a href="<?php echo MLF_TS_URL; ?>" target="_blank"><?php _e('Fix Common Problems', 'maxgalleria-media-library'); ?></a></p>
-						<p class="center-text-no-ital"><?php _e('Need help? Click here for', 'maxgalleria-media-library' ); ?> <a href="https://wordpress.org/support/plugin/media-library-plus" target="_blank"><?php _e('Awesome Support!', 'maxgalleria-media-library' ); ?></a></p>
-						<p class="center-text-no-ital"><?php _e('Or Email Us at', 'maxgalleria-media-library' ); ?> <a href="mailto:support@maxfoundry.com">support@maxfoundry.com</a></p>
+						<a id="mf-top-logo" target="_blank" href="http://maxfoundry.com"><img alt="maxfoundry logo" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL . "/images/mf-logo.png") ?>" width="140" height="25" ></a>
+						<p class="center-text"><?php esc_html_e('Makers of', 'maxgalleria-media-library' ); ?> <a target="_blank"  href="http://maxbuttons.com/">MaxButtons</a>, <a target="_blank" href="http://maxbuttons.com/product-category/button-packs/">WordPress Buttons</a> <?php esc_html_e('and', 'maxgalleria-media-library' ); ?> <a target="_blank" href="http://maxgalleria.com/">MaxGalleria</a></p>
+				    <p class="center-text-no-ital"><?php esc_html_e('Click here to', 'maxgalleria-media-library' ); ?> <a href="<?php echo esc_url(MLF_TS_URL) ?>" target="_blank"><?php esc_html_e('Fix Common Problems', 'maxgalleria-media-library'); ?></a></p>
+						<p class="center-text-no-ital"><?php esc_html_e('Need help? Click here for', 'maxgalleria-media-library' ); ?> <a href="https://wordpress.org/support/plugin/media-library-plus" target="_blank"><?php esc_html_e('Awesome Support!', 'maxgalleria-media-library' ); ?></a></p>
+						<p class="center-text-no-ital"><?php esc_html_e('Or Email Us at', 'maxgalleria-media-library' ); ?> <a href="mailto:support@maxfoundry.com">support@maxfoundry.com</a></p>
 					</div>
 					
 				</div><!--mgmlp-header-->
@@ -4563,18 +4216,18 @@ and meta_key = '_wp_attached_file'";
 		if ( ! empty( $_POST['regenerate-thumbnails'] ) || ! empty( $_REQUEST['ids'] ) ) {
 			// Capability check
 			if ( ! current_user_can( $this->capability ) )
-				wp_die( __( 'Cheatin&#8217; uh?' ) );
+				wp_die( esc_html__( 'Cheatin&#8217; uh?' ) );
 
 			// Form nonce check
 			check_admin_referer(MAXGALLERIA_MEDIA_LIBRARY_NONCE);
 
 			// Create the list of image IDs
 			if ( ! empty( $_REQUEST['ids'] ) ) {
-				$images = array_map( 'intval', explode( ',', trim( $_REQUEST['ids'], ',' ) ) );
+				$images = array_map( 'intval', explode( ',', trim( sanitize_text_field($_REQUEST['ids']), ',' ) ) );
 				$ids = implode( ',', $images );
 			} else {
 				if ( ! $images = $wpdb->get_results( "SELECT ID FROM $wpdb->posts WHERE post_type = 'attachment' AND post_mime_type LIKE 'image/%' ORDER BY ID DESC" ) ) {
-					echo '	<p>' . sprintf( __( "Unable to find any images. Are you sure <a href='%s'>some exist</a>?", 'maxgalleria-media-library' ), admin_url( 'upload.php?post_mime_type=image' ) ) . "</p></div>";
+					echo '	<p>' . sprintf( esc_html__( "Unable to find any images. Are you sure", 'maxgalleria-media-library') . "<a href='%s'>" . esc_html__(" some exist? ", 'maxgalleria-media-library' ) . "</a>",  esc_url_raw(admin_url( 'upload.php?post_mime_type=image'))) . "</p></div>";
 					return;
 				}
 
@@ -4585,30 +4238,29 @@ and meta_key = '_wp_attached_file'";
 				$ids = implode( ',', $ids );
 			}
 
-			echo '	<p id="wait-message">' . __( "Please wait while the thumbnails are regenerated. This may take a while.", 'maxgalleria-media-library' ) . '</p>';
+			echo '	<p id="wait-message">' . esc_html__( "Please wait while the thumbnails are regenerated. This may take a while.", 'maxgalleria-media-library' ) . '</p>';
 
 			$count = count( $images );
 
-			$text_goback = ( ! empty( $_GET['goback'] ) ) ? sprintf( __( 'To go back to the previous page, <a href="%s">click here</a>.', 'maxgalleria-media-library' ), 'javascript:history.go(-1)' ) : '';
+			$text_goback = ( ! empty( $_GET['goback'] ) ) ? esc_html__('To go back to the previous page, ', 'maxgalleria-media-library') . '<a href="javascript:history.go(-1)">click here</a>.' : '';
 			$text_failures = sprintf( __( 'All done! %1$s image(s) were successfully resized in %2$s seconds and there were %3$s failure(s). To try regenerating the failed images again, <a href="%4$s">click here</a>. %5$s', 'maxgalleria-media-library' ), "' + rt_successes + '", "' + rt_totaltime + '", "' + rt_errors + '", esc_url( wp_nonce_url( admin_url( 'tools.php?page=mlp-regenerate-thumbnails&goback=1' ), 'mlp-regenerate-thumbnails' ) . '&ids=' ) . "' + rt_failedlist + '", $text_goback );
 			$text_nofailures = sprintf( __( 'All done! %1$s image(s) were successfully resized in %2$s seconds and there were 0 failures. %3$s', 'maxgalleria-media-library' ), "' + rt_successes + '", "' + rt_totaltime + '", $text_goback );
 ?>
 
-
-	<noscript><p><em><?php _e( 'You must enable Javascript in order to proceed!', 'maxgalleria-media-library' ) ?></em></p></noscript>
+	<noscript><p><em><?php esc_html_e( 'You must enable Javascript in order to proceed!', 'maxgalleria-media-library' ) ?></em></p></noscript>
 
 	<div id="regenthumbs-bar" style="position:relative;height:25px;">
 		<div id="regenthumbs-bar-percent" style="position:absolute;left:50%;top:50%;width:300px;margin-left:-150px;height:25px;margin-top:-9px;font-weight:bold;text-align:center;"></div>
 	</div>
 
-	<p><input type="button" class="button hide-if-no-js" name="regenthumbs-stop" id="regenthumbs-stop" value="<?php _e( 'Abort Resizing Images', 'maxgalleria-media-library' ) ?>" /></p>
+	<p><input type="button" class="button hide-if-no-js" name="regenthumbs-stop" id="regenthumbs-stop" value="<?php esc_html_e( 'Abort Resizing Images', 'maxgalleria-media-library' ) ?>" /></p>
 
-	<h3 class="title"><?php _e( 'Debugging Information', 'maxgalleria-media-library' ) ?></h3>
+	<h3 class="title"><?php esc_html_e( 'Debugging Information', 'maxgalleria-media-library' ) ?></h3>
 
 	<p>
-		<?php printf( __( 'Total Images: %s', 'maxgalleria-media-library' ), $count ); ?><br />
-		<?php printf( __( 'Images Resized: %s', 'maxgalleria-media-library' ), '<span id="regenthumbs-debug-successcount">0</span>' ); ?><br />
-		<?php printf( __( 'Resize Failures: %s', 'maxgalleria-media-library' ), '<span id="regenthumbs-debug-failurecount">0</span>' ); ?>
+    <?php echo esc_html( __( 'Total Images: ', 'maxgalleria-media-library' ) . (int) $count) ?><br />
+    <?php echo esc_html__( 'Images Resized: ', 'maxgalleria-media-library' ) . '<span id="regenthumbs-debug-successcount">0</span>' ?><br />
+    <?php echo esc_html__( 'Resize Failures: ', 'maxgalleria-media-library' ) . '<span id="regenthumbs-debug-failurecount">0</span>' ?>
 	</p>
 
 	<ol id="regenthumbs-debuglist">
@@ -4619,7 +4271,7 @@ and meta_key = '_wp_attached_file'";
 	// <![CDATA[
 		jQuery(document).ready(function($){
 			var i;
-			var rt_images = [<?php echo $ids; ?>];
+			var rt_images = [<?php echo esc_attr($ids) ?>];
 			var rt_total = rt_images.length;
 			var rt_count = 1;
 			var rt_percent = 0;
@@ -4640,7 +4292,7 @@ and meta_key = '_wp_attached_file'";
 			//$("#regenthumbs-stop").click(function() {
       $(document).on("click", "#regenthumbs-stop", function () {
 				rt_continue = false;
-				$('#regenthumbs-stop').val("<?php echo $this->esc_quotes( __( 'Stopping...', 'maxgalleria-media-library' ) ); ?>");
+				$('#regenthumbs-stop').val("<?php echo $this->esc_quotes( esc_html__( 'Stopping...', 'maxgalleria-media-library' ) ); ?>");
 			});
 
 			// Clear out the empty list element that's there for HTML validation purposes
@@ -4673,9 +4325,9 @@ and meta_key = '_wp_attached_file'";
 				$('#regenthumbs-stop').hide();
 
 				if ( rt_errors > 0 ) {
-					rt_resulttext = '<?php echo $text_failures; ?>';
+					rt_resulttext = '<?php echo wp_kses($text_failures, $allowed_html) ?>';
 				} else {
-					rt_resulttext = '<?php echo $text_nofailures; ?>';
+					rt_resulttext = '<?php echo wp_kses($text_nofailures, $allowed_html) ?>';
 				}
 
 				$("#wait-message").html("");
@@ -4736,14 +4388,13 @@ and meta_key = '_wp_attached_file'";
 	<form method="post" action="">
 <?php wp_nonce_field(MAXGALLERIA_MEDIA_LIBRARY_NONCE) ?>
 
-	<p><?php printf( __( "Click the button below to regenerate thumbnails for all images in the Media Library. This is helpful if you have added new thumbnail sizes to your site. Existing thumbnails will not be removed to prevent breaking any links.", 'maxgalleria-media-library' ), admin_url( 'options-media.php' ) ); ?></p>
+	<p><?php printf( esc_html__( "Click the button below to regenerate thumbnails for all images in the Media Library. This is helpful if you have added new thumbnail sizes to your site. Existing thumbnails will not be removed to prevent breaking any links.", 'maxgalleria-media-library' ), admin_url( 'options-media.php' ) ); ?></p>
 
-	<p><?php printf( __( "You can regenerate thumbnails for individual images from the Media Library Folders page by checking the box below one or more images and clicking the Regenerate Thumbnails button. The regenerate operation is not reversible but you can always generate the sizes you need by adding additional thumbnail sizes to your theme.", 'maxgalleria-media-library'), admin_url( 'upload.php' ) ); ?></p>
+	<p><?php printf( esc_html__( "You can regenerate thumbnails for individual images from the Media Library Folders page by checking the box below one or more images and clicking the Regenerate Thumbnails button. The regenerate operation is not reversible but you can always generate the sizes you need by adding additional thumbnail sizes to your theme.", 'maxgalleria-media-library'), admin_url( 'upload.php' ) ); ?></p>
 
+	<p><input type="submit" class="button hide-if-no-js" name="regenerate-thumbnails" id="regenerate-thumbnails" value="<?php esc_html_e( 'Regenerate All Thumbnails', 'maxgalleria-media-library' ) ?>" /></p>
 
-	<p><input type="submit" class="button hide-if-no-js" name="regenerate-thumbnails" id="regenerate-thumbnails" value="<?php _e( 'Regenerate All Thumbnails', 'maxgalleria-media-library' ) ?>" /></p>
-
-	<noscript><p><em><?php _e( 'You must enable Javascript in order to proceed!', 'maxgalleria-media-library' ) ?></em></p></noscript>
+	<noscript><p><em><?php esc_html_e( 'You must enable Javascript in order to proceed!', 'maxgalleria-media-library' ) ?></em></p></noscript>
 
 	</form>
 <?php
@@ -4755,7 +4406,6 @@ and meta_key = '_wp_attached_file'";
 
 <?php
 	}
-
 
 	// Process a single image ID (this is an AJAX handler)
 	public function ajax_process_image() {
@@ -4770,10 +4420,10 @@ and meta_key = '_wp_attached_file'";
 		$image = get_post( $id );
 
 		if ( ! $image || 'attachment' != $image->post_type || 'image/' != substr( $image->post_mime_type, 0, 6 ) )
-			die( json_encode( array( 'error' => sprintf( __( 'Failed resize: %s is an invalid image ID.', 'maxgalleria-media-library' ), esc_html( $_REQUEST['id'] ) ) ) ) );
+			die( json_encode( array( 'error' => sprintf( esc_html__( 'Failed resize: %s is an invalid image ID.', 'maxgalleria-media-library' ), esc_html( $_REQUEST['id'] ) ) ) ) );
 
 		if ( ! current_user_can( $this->capability ) )
-			$this->die_json_error_msg( $image->ID, __( "Your user account doesn't have permission to resize images", 'maxgalleria-media-library' ) );
+			$this->die_json_error_msg( $image->ID, esc_html__( "Your user account doesn't have permission to resize images", 'maxgalleria-media-library' ) );
 
 		$fullsizepath = get_attached_file( $image->ID );
     
@@ -4782,12 +4432,12 @@ and meta_key = '_wp_attached_file'";
     if($scaled_position != false) {
       $temp_path = substr($fullsizepath, 0, $scaled_position);
       $temp_path .= substr($fullsizepath, $scaled_position+7);
-      error_log("temp_path $temp_path");
+      //error_log("temp_path $temp_path");
       $fullsizepath = $temp_path;
     }
     
 		if ( false === $fullsizepath || ! file_exists( $fullsizepath ) )
-			$this->die_json_error_msg( $image->ID, sprintf( __( 'The originally uploaded image file cannot be found at %s', 'maxgalleria-media-library' ), '<code>' . esc_html( $fullsizepath ) . '</code>' ) );
+			$this->die_json_error_msg( $image->ID, sprintf( esc_html__( 'The originally uploaded image file cannot be found at %s', 'maxgalleria-media-library' ), '<code>' . esc_html( $fullsizepath ) . '</code>' ) );
 
 		@set_time_limit( 900 ); // 5 minutes per image should be PLENTY
 
@@ -4802,19 +4452,18 @@ and meta_key = '_wp_attached_file'";
 		if ( is_wp_error( $metadata ) )
 			$this->die_json_error_msg( $image->ID, $metadata->get_error_message() );
 		if ( empty( $metadata ) )
-			$this->die_json_error_msg( $image->ID, __( 'Unknown failure reason.', 'maxgalleria-media-library' ) );
+			$this->die_json_error_msg( $image->ID, esc_html__( 'Unknown failure reason.', 'maxgalleria-media-library' ) );
 
 		// If this fails, then it just means that nothing was changed (old value == new value)
 		wp_update_attachment_metadata( $image->ID, $metadata );
 
-		die( json_encode( array( 'success' => sprintf( __( '&quot;%1$s&quot; (ID %2$s) was successfully resized in %3$s seconds.', 'maxgalleria-media-library' ), esc_html( get_the_title( $image->ID ) ), $image->ID, timer_stop() ) ) ) );
+		die( json_encode( array( 'success' => sprintf( esc_html__( '&quot;%1$s&quot; (ID %2$s) was successfully resized in %3$s seconds.', 'maxgalleria-media-library' ), esc_html( get_the_title( $image->ID ) ), $image->ID, timer_stop() ) ) ) );
 	}
 
 	// Helper to make a JSON error message
 	public function die_json_error_msg( $id, $message ) {
-		die( json_encode( array( 'error' => sprintf( __( '&quot;%1$s&quot; (ID %2$s) failed to resize. The error message was: %3$s', 'maxgalleria-media-library' ), esc_html( get_the_title( $id ) ), $id, $message ) ) ) );
+		die( json_encode( array( 'error' => sprintf( esc_html__( '&quot;%1$s&quot; (ID %2$s) failed to resize. The error message was: %3$s', 'maxgalleria-media-library' ), esc_html( get_the_title( $id ) ), $id, $message ) ) ) );
 	}
-
 
 	// Helper function to escape quotes in strings for use in Javascript
 	public function esc_quotes( $string ) {
@@ -4832,36 +4481,39 @@ and meta_key = '_wp_attached_file'";
 
 						<div id="mgmlp-header">		
 							<div id='mgmlp-title-area'>
-								<h2 class='mgmlp-title'><?php _e('Image SEO', 'maxgalleria-media-library' ); ?></h2>  
+								<h2 class='mgmlp-title'><?php esc_html_e('Image SEO', 'maxgalleria-media-library' ); ?></h2>  
 
 							</div> <!-- mgmlp-title-area -->
 							<div id="new-top-promo">
-								<a id="mf-top-logo" target="_blank" href="http://maxfoundry.com"><img alt="maxfoundry logo" src="<?php echo MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL ?>/images/mf-logo.png" width="140" height="25" ></a>
-								<p class="center-text"><?php _e('Makers of', 'maxgalleria-media-library' ); ?> <a target="_blank"  href="http://maxbuttons.com/">MaxButtons</a>, <a target="_blank" href="http://maxbuttons.com/product-category/button-packs/">WordPress Buttons</a> <?php _e('and', 'maxgalleria-media-library' ); ?> <a target="_blank" href="http://maxgalleria.com/">MaxGalleria</a></p>						
-								<p class="center-text-no-ital"><?php _e('Click here to', 'maxgalleria-media-library' ); ?> <a href="<?php echo MLF_TS_URL; ?>" target="_blank"><?php _e('Fix Common Problems', 'maxgalleria-media-library'); ?></a></p>
-								<p class="center-text-no-ital"><?php _e('Need help? Click here for', 'maxgalleria-media-library' ); ?> <a href="https://wordpress.org/support/plugin/media-library-plus" target="_blank"><?php _e('Awesome Support!', 'maxgalleria-media-library' ); ?></a></p>
-								<p class="center-text-no-ital"><?php _e('Or Email Us at', 'maxgalleria-media-library' ); ?> <a href="mailto:support@maxfoundry.com">support@maxfoundry.com</a></p>
+								<a id="mf-top-logo" target="_blank" href="http://maxfoundry.com"><img alt="maxfoundry logo" src="<?php echo esc_url(MAXGALLERIA_MEDIA_LIBRARY_PLUGIN_URL) ?>/images/mf-logo.png" width="140" height="25" ></a>
+								<p class="center-text"><?php esc_html_e('Makers of', 'maxgalleria-media-library' ); ?> <a target="_blank"  href="http://maxbuttons.com/">MaxButtons</a>, <a target="_blank" href="http://maxbuttons.com/product-category/button-packs/">WordPress Buttons</a> <?php esc_html_e('and', 'maxgalleria-media-library' ); ?> <a target="_blank" href="http://maxgalleria.com/">MaxGalleria</a></p>						
+								<p class="center-text-no-ital"><?php esc_html_e('Click here to', 'maxgalleria-media-library' ); ?> <a href="<?php echo esc_url(MLF_TS_URL) ?>" target="_blank"><?php esc_html_e('Fix Common Problems', 'maxgalleria-media-library'); ?></a></p>
+								<p class="center-text-no-ital"><?php esc_html_e('Need help? Click here for', 'maxgalleria-media-library' ); ?> <a href="https://wordpress.org/support/plugin/media-library-plus" target="_blank"><?php esc_html_e('Awesome Support!', 'maxgalleria-media-library' ); ?></a></p>
+								<p class="center-text-no-ital"><?php esc_html_e('Or Email Us at', 'maxgalleria-media-library' ); ?> <a href="mailto:support@maxfoundry.com">support@maxfoundry.com</a></p>
 							</div>
 
 						</div><!--mgmlp-header-->
 						<div class="mlf-clearfix"></div>  
 	
 						<div id="mlp-left-column">
-							<p><?php _e('When Image SEO is enabled Media Library Folders automatically adds  ALT and Title attributes with the default settings defined below to all your images as they are uploaded.','maxgalleria-media-library'); ?></p>
-							<p><?php _e('You can easily override the Image SEO default settings when you  are uploading new images. When Image SEO is enabled you will see two fields  under the Upload Box when you add a file - Image Title Text and Image ALT Text.  Whatever you type into these fields overrides the default settings for the  current upload or sync operations.','maxgalleria-media-library'); ?></p>
-							<p><?php _e('To change the settings on an individual image simply click on  the image and change the settings on the far right.  Save and then back click to return to Media  Library Plus or MLPP.','maxgalleria-media-library'); ?><br>
-							<p><?php _e('Image SEO supports two special tags:','maxgalleria-media-library'); ?><br>
-							<?php _e('%filename - replaces image file name ( without extension )','maxgalleria-media-library'); ?><br>
-							<?php _e('%foldername - replaces image folder name','maxgalleria-media-library'); ?></p>
+							<p><?php esc_html_e('When Image SEO is enabled Media Library Folders automatically adds  ALT and Title attributes with the default settings defined below to all your images as they are uploaded.','maxgalleria-media-library'); ?></p>
+							<p><?php esc_html_e('You can easily override the Image SEO default settings when you  are uploading new images. When Image SEO is enabled you will see two fields  under the Upload Box when you add a file - Image Title Text and Image ALT Text.  Whatever you type into these fields overrides the default settings for the  current upload or sync operations.','maxgalleria-media-library'); ?></p>
+							<p><?php esc_html_e('To change the settings on an individual image simply click on  the image and change the settings on the far right.  Save and then back click to return to Media  Library Plus or MLPP.','maxgalleria-media-library'); ?><br>
+							<p><?php esc_html_e('Image SEO supports two special tags:','maxgalleria-media-library'); ?><br>
+							<?php esc_html_e('%filename - replaces image file name ( without extension )','maxgalleria-media-library'); ?><br>
+							<?php esc_html_e('%foldername - replaces image folder name','maxgalleria-media-library'); ?></p>
 						
 							<?php 
-							//$defatul_alt = '';
+							//$default_alt = '';
 							//$default_title = '';
-							$defatul_alt = get_option(MAXGALLERIA_MEDIA_LIBRARY_ATL_DEFAULT);
+							$default_alt = get_option(MAXGALLERIA_MEDIA_LIBRARY_ATL_DEFAULT);
 							$default_title = get_option(MAXGALLERIA_MEDIA_LIBRARY_TITLE_DEFAULT);
               
-							if($defatul_alt === '')
-								$defatul_alt = '%foldername - %filename';
+              error_log("image_seo defatul_alt $default_alt");
+              error_log("image_seo default_title $default_title");
+              
+							if($default_alt === '')
+								$default_alt = '%foldername - %filename';
 							if($default_title === '')
 								$default_title = '%foldername photo';
 
@@ -4871,27 +4523,27 @@ and meta_key = '_wp_attached_file'";
 							<table id="mlp-image-seo">
 								<thead>
 									<tr>
-										<td colspan="3"><?php _e('Settings','maxgalleria-media-library'); ?></td>
+										<td colspan="3"><?php esc_html_e('Settings','maxgalleria-media-library'); ?></td>
 									</tr>
 								</thead>
 								<tbody>
 									<tr>
-										<td><?php _e('Turn on Image SEO:','maxgalleria-media-library'); ?></td>
-										<td><input name="seo-images" id="seo-images" type="checkbox" <?php checked($checked, 'on', true ); ?> </td>
+										<td><?php esc_html_e('Turn on Image SEO:','maxgalleria-media-library'); ?></td>
+										<td><input name="seo-images" id="seo-images" type="checkbox" <?php echo esc_attr(checked($checked, 'on', false )); ?> </td>
 										<td></td>
 									</tr>
 									<tr>
-										<td><?php _e('Image ALT attribute:','maxgalleria-media-library'); ?></td>
-										<td><input type="text" value="<?php echo $defatul_alt; ?>" name="default-alt" id="default-alt"></td>
-										<td><em><?php _e('example','maxgalleria-media-library'); ?> %foldername - %filename</em></td>									
+										<td><?php esc_html_e('Image ALT attribute:','maxgalleria-media-library'); ?></td>
+										<td><input type="text" value="<?php echo esc_attr($default_alt) ?>" name="default-alt" id="default-alt" autocomplete="off"></td>
+										<td><em><?php esc_html_e('example','maxgalleria-media-library'); ?> %foldername - %filename</em></td>									
 									</tr>
 									<tr>
-										<td><?php _e('Image Title attribute:','maxgalleria-media-library'); ?></td>
-										<td><input type="text" value="<?php echo $default_title; ?>" name="default-title" id="default-title"></td>
-										<td><em><?php _e('example','maxgalleria-media-library'); ?> %filename photo</em></td>									
+										<td><?php esc_html_e('Image Title attribute:','maxgalleria-media-library'); ?></td>
+										<td><input type="text" value="<?php echo esc_attr($default_title) ?>" name="default-title" id="default-title" autocomplete="off"></td>
+										<td><em><?php esc_html_e('example','maxgalleria-media-library'); ?> %filename photo</em></td>									
 									</tr>								
 									<tr>
-										<td colspan="3"><a class="button" id="mlp-update-seo-settings"><?php _e('Update Settings','maxgalleria-media-library'); ?></a></td>									
+										<td colspan="3"><a class="button" id="mlp-update-seo-settings"><?php esc_html_e('Update Settings','maxgalleria-media-library'); ?></a></td>									
 									</tr>
 								</tbody>							
 							</table>
@@ -4908,25 +4560,27 @@ and meta_key = '_wp_attached_file'";
 	}
 	
 	public function mlp_image_seo_change() {
-		
+    		
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
 		    
     if ((isset($_POST['checked'])) && (strlen(trim($_POST['checked'])) > 0))
-      $checked = trim(stripslashes(strip_tags($_POST['checked'])));
+      $checked = trim(sanitize_text_field($_POST['checked']));
     else
       $checked = "off";
 		
     if ((isset($_POST['default_alt'])) && (strlen(trim($_POST['default_alt'])) > 0))
-      $default_alt = trim(stripslashes(strip_tags($_POST['default_alt'])));
+      $default_alt = trim(sanitize_text_field($_POST['default_alt']));
     else
       $default_alt = "";
 		
     if ((isset($_POST['default_title'])) && (strlen(trim($_POST['default_title'])) > 0))
-      $default_title = trim(stripslashes(strip_tags($_POST['default_title'])));
+      $default_title = trim(sanitize_text_field($_POST['default_title']));
     else
       $default_title = "";
+    
+    error_log("default_title $default_title");
 		
     update_option(MAXGALLERIA_MEDIA_LIBRARY_IMAGE_SEO, $checked );		
 		
@@ -4934,7 +4588,7 @@ and meta_key = '_wp_attached_file'";
 		
     update_option(MAXGALLERIA_MEDIA_LIBRARY_TITLE_DEFAULT, $default_title );		
 		
-		echo __('The Image SEO settings have been updated ','maxgalleria-media-library');
+		echo esc_html__('The Image SEO settings have been updated ','maxgalleria-media-library');
 				
 		die();
 		
@@ -5047,7 +4701,7 @@ group by ID
 order by meta_id";
 
 
-		//echo $sql;
+		//error_log($sql);
 
 		$rows = $wpdb->get_results($sql);
 
@@ -5065,21 +4719,23 @@ order by meta_id";
 	}
 	
 	public function hide_maxgalleria_media() {
+    
+    error_log("hide_maxgalleria_media");
 		
     global $wpdb;
     
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
-    } 
+      exit( esc_html__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
+    }  
     
 		if ((isset($_POST['folder_id'])) && (strlen(trim($_POST['folder_id'])) > 0))
-      $folder_id = trim(stripslashes(strip_tags($_POST['folder_id'])));
+      $folder_id = trim(sanitize_text_field($_POST['folder_id']));
     else
       $folder_id = "";
 
     // prevent hiding of the uploads folder and sub folders  
     if(intval($folder_id) == intval($this->uploads_folder_ID)) {
-      echo __('The uploads folder cannot be hidden.','maxgalleria-media-library');
+      echo esc_html__('The uploads folder cannot be hidden.','maxgalleria-media-library');
       die();
     }
 			
@@ -5108,9 +4764,8 @@ and meta_key = '_wp_attached_file';";
 								
 			}
 			
-			$location = 'window.location.href = "' . site_url() . '/wp-admin/admin.php?page=media-library-folders&media-folder=' . $parent_folder .'";';
-			echo __('The selected folder, subfolders and thier files have been hidden.','maxgalleria-media-library');
-			echo "<script>$location</script>";
+			echo esc_html__('The selected folder, subfolders and thier files have been hidden.','maxgalleria-media-library');
+			echo "<script>window.location.href = '" . esc_url_raw(site_url() . '/wp-admin/admin.php?page=media-library-folders&media-folder=' . $parent_folder) . "'</script>";
 					
 		}	
 		
@@ -5210,7 +4865,7 @@ where folder_id = $folder_id";
 	public function mlf_hide_info() {
 				
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(esc_html__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
 		
     $current_user_id = get_current_user_id(); 
@@ -5218,45 +4873,22 @@ where folder_id = $folder_id";
     update_user_meta( $current_user_id, MAXGALLERIA_MLP_DISPLAY_INFO, 'off' );
 				
 	}
-	
-	public function set_floating_filetree() {
-		
-    if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
-    } 
-
-		if ((isset($_POST['filetree_status'])) && (strlen(trim($_POST['filetree_status'])) > 0))
-      $filetree_status = trim(stripslashes(strip_tags($_POST['filetree_status'])));
-    else
-      $filetree_status = "";
-				
-		if($filetree_status != "") {
-			
-			$current_user_id = get_current_user_id(); 
-			// if checked, disable
-			if($filetree_status == 'true')
-			  update_user_meta( $current_user_id, MAXGALLERIA_MLP_DISABLE_FT, 'on' );
-			else
-			  update_user_meta( $current_user_id, MAXGALLERIA_MLP_DISABLE_FT, 'off' );						
-		}
-		
-    echo __('The settings were updated.','maxgalleria-media-library');
-		die();
-	}
-  
+	  
 	public function mlfp_set_scaling() {
+    
+    error_log("mlfp_set_scaling");
 		
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(esc_html__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     } 
 
 		if ((isset($_POST['scaling_status'])) && (strlen(trim($_POST['scaling_status'])) > 0))
-      $scaling_status = trim(stripslashes(strip_tags($_POST['scaling_status'])));
+      $scaling_status = trim(sanitize_text_field($_POST['scaling_status']));
     else
       $scaling_status = "";
         
 		if ((isset($_POST['images_per_page'])) && (strlen(trim($_POST['images_per_page'])) > 0))
-      $images_per_page = trim(stripslashes(strip_tags($_POST['images_per_page'])));
+      $images_per_page = trim(sanitize_text_field($_POST['images_per_page']));
     else
       $images_per_page = "";
     
@@ -5267,7 +4899,7 @@ where folder_id = $folder_id";
       
 		update_option(MAXGALLERIA_MLP_ITEMS_PRE_PAGE, $images_per_page, true);
       
-    echo __('The settings were updated.','maxgalleria-media-library');
+    echo esc_html__('The settings were updated.','maxgalleria-media-library');
 		die();
 	}
     
@@ -5298,7 +4930,6 @@ and meta_key = '_wp_attached_file'";
 
     $current_row = $wpdb->get_row($sql);
 		
-    //$image_location = $this->upload_dir['baseurl'] . '/' . $current_row->attached_file;
 		$baseurl = $this->upload_dir['baseurl'];
 		$baseurl = rtrim($baseurl, '/') . '/';
 		$image_location = $baseurl . ltrim($current_row->attached_file, '/');
@@ -5311,7 +4942,7 @@ and meta_key = '_wp_attached_file'";
       update_user_meta($user_id, MAXG_SYNC_FOLDER_PATH, str_replace('\\', '\\\\', $folder_path));
     else
       update_user_meta($user_id, MAXG_SYNC_FOLDER_PATH, $folder_path);
-    //error_log("folder_path $folder_path");
+    
     $folder_contents = array_diff(scandir($folder_path), array('..', '.'));
 						
     foreach ($folder_contents as $file_path) {
@@ -5326,7 +4957,6 @@ and meta_key = '_wp_attached_file'";
                   if(!$this->search_folder_attachments($file_path, $attachments)) {
 
                     $old_attachment_name = $new_attachment;
-                    //$new_attachment = pathinfo($new_attachment, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR . pathinfo($new_attachment, PATHINFO_FILENAME) . "." . strtolower(pathinfo($new_attachment, PATHINFO_EXTENSION));
                     $new_attachment = pathinfo($new_attachment, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR . sanitize_file_name(pathinfo($new_attachment, PATHINFO_FILENAME) . "." . strtolower(pathinfo($new_attachment, PATHINFO_EXTENSION)));
 
                     if(rename($old_attachment_name, $new_attachment)) {	
@@ -5343,11 +4973,9 @@ and meta_key = '_wp_attached_file'";
           }
 				}
 			}		
-      //error_log("files_count $files_count");
 		}
     
     if(is_array($files_to_add)) {
-      //error_log(print_r($files_to_add, true));
       update_user_meta($user_id, MAXG_SYNC_FILES, $files_to_add);
     }
     if($files_count > 0)
@@ -5359,32 +4987,34 @@ and meta_key = '_wp_attached_file'";
   
   public function mlfp_run_sync_process() {
     
+    error_log("mlfp_run_sync_process");
+    
     global $wpdb;
 		$user_id = get_current_user_id();
     $message = "";
     $folders_array = array();
     
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(esc_html__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     }
         
 		if ((isset($_POST['phase'])) && (strlen(trim($_POST['phase'])) > 0))
-      $phase = trim(stripslashes(strip_tags($_POST['phase'])));
+      $phase = trim(sanitize_text_field($_POST['phase']));
     else
       $phase = "";
     
 		if ((isset($_POST['parent_folder'])) && (strlen(trim($_POST['parent_folder'])) > 0))
-      $parent_folder = trim(stripslashes(strip_tags($_POST['parent_folder'])));
+      $parent_folder = trim(sanitize_text_field($_POST['parent_folder']));
     else
       $parent_folder = "";
 
 		if ((isset($_POST['mlp_title_text'])) && (strlen(trim($_POST['mlp_title_text'])) > 0))
-      $mlp_title_text = trim(stripslashes(strip_tags($_POST['mlp_title_text'])));
+      $mlp_title_text = trim(sanitize_text_field($_POST['mlp_title_text']));
     else
       $mlp_title_text = "";
 
 		if ((isset($_POST['mlp_alt_text'])) && (strlen(trim($_POST['mlp_alt_text'])) > 0))
-      $mlp_alt_text = trim(stripslashes(strip_tags($_POST['mlp_alt_text'])));
+      $mlp_alt_text = trim(sanitize_text_field($_POST['mlp_alt_text']));
     else
       $mlp_alt_text = "";
     
@@ -5407,7 +5037,6 @@ and meta_key = '_wp_attached_file'";
         } else {
           $next_folder = $folders_array;
         }  
-        //error_log("next_folder $next_folder");
         
         if($next_folder != "") {
           $message = __("Scanning for new files and folders...please wait.",'maxgalleria-media-library');        
@@ -5456,7 +5085,7 @@ and meta_key = '_wp_attached_file'";
     }  
     $phase = $next_phase;
     
-	  $data = array('phase' => $phase, 'message' => $message);								
+	  $data = array('phase' => $phase, 'message' => esc_html($message));								
 		echo json_encode($data);						
     die();
   }
@@ -5473,8 +5102,6 @@ and meta_key = '_wp_attached_file'";
       $folder_path = get_user_meta($user_id, MAXG_SYNC_FOLDER_PATH, true);
 
       $new_attachment = $folder_path . DIRECTORY_SEPARATOR . $next_file;
-      
-      //error_log("new_attachment $new_attachment");
       
 			$new_file_title = preg_replace( '/\.[^.]+$/', '', $next_file);								      
 
@@ -5505,31 +5132,31 @@ and meta_key = '_wp_attached_file'";
     $next_phase = '2';
     
     if ( !wp_verify_nonce( $_POST['nonce'], MAXGALLERIA_MEDIA_LIBRARY_NONCE)) {
-      exit(__('missing nonce!','maxgalleria-media-library'));
+      exit(esc_html__('missing nonce! Please refresh this page.','maxgalleria-media-library'));
     }
     
 		if ((isset($_POST['phase'])) && (strlen(trim($_POST['phase'])) > 0))
-      $phase = trim(stripslashes(strip_tags($_POST['phase'])));
+      $phase = trim(sanitize_textarea_field($_POST['phase']));
     else
       $phase = "";
     
     if ((isset($_POST['folder_id'])) && (strlen(trim($_POST['folder_id'])) > 0))
-      $folder_id = trim(stripslashes(strip_tags($_POST['folder_id'])));
+      $folder_id = trim(sanitize_textarea_field($_POST['folder_id']));
     else
       $folder_id = "";
     
     if ((isset($_POST['current_folder'])) && (strlen(trim($_POST['current_folder'])) > 0))
-      $current_folder = trim(stripslashes(strip_tags($_POST['current_folder'])));
+      $current_folder = trim(sanitize_textarea_field($_POST['current_folder']));
     else
       $current_folder = "";
     
     if ((isset($_POST['action_name'])) && (strlen(trim($_POST['action_name'])) > 0))
-      $action_name = trim(stripslashes(strip_tags($_POST['action_name'])));
+      $action_name = trim(sanitize_textarea_field($_POST['action_name']));
     else
       $action_name = "";    
     
     if ((isset($_POST['serial_copy_ids'])) && (strlen(trim($_POST['serial_copy_ids'])) > 0))
-      $serial_copy_ids = trim(stripslashes(strip_tags($_POST['serial_copy_ids'])));
+      $serial_copy_ids = trim(sanitize_textarea_field($_POST['serial_copy_ids']));
     else
       $serial_copy_ids = "";
 		
@@ -5578,7 +5205,7 @@ and meta_key = '_wp_attached_file'";
     }
     $phase = $next_phase;
        
-	  $data = array('phase' => $phase, 'message' => $message);								
+	  $data = array('phase' => $phase, 'message' => esc_html($message));								
     
 		echo json_encode($data);						
     
@@ -5586,6 +5213,8 @@ and meta_key = '_wp_attached_file'";
   }
   
   public function move_copy_file($copy, $copy_id, $folder_id, $current_folder, $user_id) {
+    
+    error_log("move_copy_file");
     
     global $wpdb, $is_IIS;
 		$message = "";
@@ -5631,13 +5260,10 @@ AND meta_key = '_wp_attached_file'";
 
               if($scaled) {
                 $full_scaled_image_path = str_replace('-scaled*', '', $image_path);
-                //error_log("full_scaled_image_path $full_scaled_image_path");
                 if(file_exists($full_scaled_image_path)) {
-                  //error_log("file_exists");
                   $image_path = $full_scaled_image_path;
                   $full_scaled_image = substr($full_scaled_image_path, strrpos($full_scaled_image_path, '/')+1);
                   $destination_name = $destination_path . DIRECTORY_SEPARATOR . $full_scaled_image;                  
-                  //error_log("destination_name $destination_name");
                 }
               }
 
@@ -5652,7 +5278,7 @@ AND meta_key = '_wp_attached_file'";
                 }  
               }
               else {
-                echo __('Unable to copy the file; please check the folder and file permissions.','maxgalleria-media-library') . PHP_EOL;
+                echo esc_html__('Unable to copy the file; please check the folder and file permissions.','maxgalleria-media-library') . PHP_EOL;
                 $copy_status = false; 
               }
               //move
@@ -5664,7 +5290,7 @@ AND meta_key = '_wp_attached_file'";
                 $update_theme_mods = false;
                 $move_image_url = $this->get_file_url_for_copy($image_path);
                 $move_destination_url = $this->get_file_url_for_copy($destination_name);
-                $key = array_search ($move_image_url, $this->theme_mods);
+                $key = array_search ($move_image_url, $this->theme_mods, true);
                 if($key !== false ) {
                   set_theme_mod( $key, $move_destination_url);
                   $update_theme_mods = true;                      
@@ -5688,13 +5314,11 @@ AND meta_key = '_wp_attached_file'";
                   if(file_exists($full_scaled_image_path))
                     rename($full_scaled_image_path, $scaled_image_destination);  
                 }
-
                 
                 if(isset($metadata['sizes'])) {
                   
                   foreach($metadata['sizes'] as $source_path) {
                     $thumbnail_file = $path_to_thumbnails . DIRECTORY_SEPARATOR . $source_path['file'];
-                    //error_log("thumbnail_file $thumbnail_file");
                     $thumbnail_destination = $destination_path . DIRECTORY_SEPARATOR . $source_path['file'];
 		                if(file_exists($thumbnail_file)) {
                       rename($thumbnail_file, $thumbnail_destination);
@@ -5704,7 +5328,7 @@ AND meta_key = '_wp_attached_file'";
                       $update_theme_mods = false;
                       $move_source_url = $this->get_file_url_for_copy($source_path);
                       $move_thumbnail_url = $this->get_file_url_for_copy($thumbnail_destination);
-                      $key = array_search ($move_source_url, $this->theme_mods);
+                      $key = array_search ($move_source_url, $this->theme_mods, true);
                       if($key !== false ) {
                         set_theme_mod( $key, $move_thumbnail_url);
                         $update_theme_mods = true;                      
@@ -5770,7 +5394,6 @@ AND meta_key = '_wp_attached_file'";
                 // update postmeta records for beaver builder
                 if(class_exists( 'FLBuilderLoader')) {
                   $sql = "SELECT ID FROM {$wpdb->prefix}posts WHERE post_content LIKE '%$replace_image_location%'";
-                  //error_log($sql);
                   
                   $records = $wpdb->get_results($sql);
                   foreach($records as $record) {
@@ -5785,11 +5408,9 @@ AND meta_key = '_wp_attached_file'";
                   if ( class_exists( 'FLCustomizer' ) && method_exists( 'FLCustomizer', 'clear_all_css_cache' ) ) {
                     FLCustomizer::clear_all_css_cache();
                   }
-
                   
                 }
                                                
-                //echo __('Updating post links, please wait...','maxgalleria-media-library') . PHP_EOL;
                 $replace_sql = "UPDATE {$wpdb->prefix}posts SET `post_content` = REPLACE (`post_content`, '$replace_image_location', '$replace_destination_url');";
                 $result = $wpdb->query($replace_sql);
                 
@@ -5812,48 +5433,48 @@ AND meta_key = '_wp_attached_file'";
                   $this->update_elementor_data($copy_id, $replace_image_location, $destination_url);
                 }
                                 
-                $message .= __('Updating attachment links, please wait...','maxgalleria-media-library') . PHP_EOL;
+                $message .= esc_html__('Updating attachment links, please wait...','maxgalleria-media-library') . PHP_EOL;
                 $files = $this->display_folder_contents ($current_folder, true, "", false);
                 $refresh = true;
               }                                   
               else {
-                $message .= __('Unable to move ','maxgalleria-media-library') . $basename . __('; please check the folder and file permissions.','maxgalleria-media-library') . PHP_EOL;
+                $message .= esc_html( __('Unable to move ','maxgalleria-media-library') . $basename . __('; please check the folder and file permissions.','maxgalleria-media-library') . PHP_EOL);
                 $copy_status = false; 
               }
             } 
           }
           else {
-            $message .= __('The destination is not a folder: ','maxgalleria-media-library') . $destination_path . PHP_EOL;
+            $message .= esc_html( __('The destination is not a folder: ','maxgalleria-media-library') . $destination_path . PHP_EOL);
             $copy_status = false; 
           }
         }
         else {
-          $message .= __('Cannot find destination folder: ','maxgalleria-media-library') . $destination_path . PHP_EOL;
+          $message .= esc_html( __('Cannot find destination folder: ','maxgalleria-media-library') . $destination_path . PHP_EOL);
           $copy_status = false; 
         }
       }   
       else {
-        $message .= __('Coping or moving a folder is not allowed.','maxgalleria-media-library') . PHP_EOL;
+        $message .= esc_html__('Coping or moving a folder is not allowed.','maxgalleria-media-library') . PHP_EOL;
         $copy_status = false; 
       }
     }
     else {
-      $message .= __('Cannot find the file: ','maxgalleria-media-library') . $image_path . ". " . PHP_EOL;
-      $this->write_log("Cannot find the file: $image_path");
+      $message .= esc_html( __('Cannot find the file: ','maxgalleria-media-library') . $image_path . ". " . PHP_EOL);
+      //$this->write_log("Cannot find the file: $image_path");
       $copy_status = false; 
     }        
   
     if($copy) {
       if($copy_status)
-        $message .= $basename . __(' was copied to ','maxgalleria-media-library') . $folder_basename . PHP_EOL;      
+        $message .= esc_html($basename . __(' was copied to ','maxgalleria-media-library') . $folder_basename . PHP_EOL);      
       else
-        $message .= $basename . __(' was not copied.','maxgalleria-media-library') . PHP_EOL;      
+        $message .= esc_html($basename . __(' was not copied.','maxgalleria-media-library') . PHP_EOL);      
     }
     else {
       if($copy_status)
-        $message .= $basename . __(' was moved to ','maxgalleria-media-library') . $folder_basename . PHP_EOL;      
+        $message .= esc_html($basename . __(' was moved to ','maxgalleria-media-library') . $folder_basename . PHP_EOL);      
       else
-        $message .= $basename . __(' was not moved.','maxgalleria-media-library') . PHP_EOL;              
+        $message .= esc_html($basename . __(' was not moved.','maxgalleria-media-library') . PHP_EOL);      
     }
 
     return $message;
@@ -5862,8 +5483,6 @@ AND meta_key = '_wp_attached_file'";
   
   public function update_wppb_data($replace_image_location, $destination_url) {
     
-    //error_log("update_wppb_data");
-
     global $wpdb;
     $save = false;
     $table = $wpdb->prefix . "postmeta";
@@ -5972,7 +5591,6 @@ AND meta_key = '_wp_attached_file'";
         
         if(is_array($jarrays)) {          
           foreach($jarrays as &$jarray) {
-            //error_log("is an array");
             if($this->search_elementor_array($image_id, $jarray, $replace_image_location, $replace_destination_url, $row->post_id))
               $save = true;
           }
@@ -6043,7 +5661,6 @@ AND meta_key = '_wp_attached_file'";
             foreach ($info_value as $data_key => &$data_value) {
               if(!is_array($data_value)) {
                 if($data_key == 'photo_src' || $data_key == 'text') {
-                  //error_log("meta key found $data_key, replacing $data_value");
                   $save = true;
                   $data_value = str_replace($replace_image_location, $replace_destination_url, $data_value);
                 }
@@ -6051,7 +5668,6 @@ AND meta_key = '_wp_attached_file'";
                 foreach ($data_value as $next_key => &$next_value) {
                   if(!is_array($next_value)) {
                     if($next_key == 'url') {
-                      //error_log("url found $next_value");
                       $save = true;
                       $next_value = str_replace($replace_image_location, $replace_destination_url, $next_value);
                     }                  
@@ -6061,7 +5677,6 @@ AND meta_key = '_wp_attached_file'";
                         foreach ($sizes_value as $final_key => &$final_value) {
                           if(!is_array($final_value)) {
                             if($final_key == 'url') {
-                              //error_log("url final_key found $final_value");
                               $save = true;
                               $final_value = str_replace($replace_image_location, $replace_destination_url, $final_value);
                             }                            
@@ -6123,9 +5738,7 @@ AND meta_key = '_wp_attached_file'";
 
     $records = $wpdb->get_results($sql);
     foreach($records as $record) {
-      
-      //error_log($record->post_id);
-            
+                  
       $data = unserialize($record->meta_value);
       
       if (isset($data['widgets']) && is_array($data['widgets'])) {
@@ -6149,10 +5762,7 @@ AND meta_key = '_wp_attached_file'";
         }
         
       }
-      
-      //$data = serialize($data);
-      //error_log(print_r($data, true));
-      
+            
 		  update_post_meta($record->post_id, $record->meta_key, $data);												      
     }        
   }
