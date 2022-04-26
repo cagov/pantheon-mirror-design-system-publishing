@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Plugin Name: ca.gov Headless Wordpress
- * Plugin URI: https://github.com/cagov/cagov-headless-wordpress
- * Description: Create content with the California Design System to flattened sites.
+ * Plugin Name: CA Design System - "Headless" 11ty REST API settings.
+ * Plugin URI: https://github.com/cagov/design-system-wordpress-11ty
+ * Description: Create content with the California Design System to flattened, static sites.
  * Author: Office of Digital Innovation
  * Author URI: https://digital.ca.gov
  * Version: 1.1.5

@@ -1,4 +1,6 @@
 # Roadmap
+## 0.3
+
 ## 0.2+
 * Add theme switcher option in customizer
 * Add option ot add google search ID and analytics
