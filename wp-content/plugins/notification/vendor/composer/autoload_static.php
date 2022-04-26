@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit67da0f3173284d9d8a30dd1bb2fb081b
+class ComposerStaticInitfd590546b3ebb80118ecd6f27096ae84
 {
     public static $files = array (
         '8bc1a8c3753b446fe086452ebd43c528' => __DIR__ . '/..' . '/micropackage/templates/src/functions/template.php',
@@ -225,6 +225,7 @@ class ComposerStaticInit67da0f3173284d9d8a30dd1bb2fb081b
         'BracketSpace\\Notification\\Defaults\\Trigger\\Post\\PostDrafted' => __DIR__ . '/../..' . '/src/Defaults/Trigger/Post/PostDrafted.php',
         'BracketSpace\\Notification\\Defaults\\Trigger\\Post\\PostPending' => __DIR__ . '/../..' . '/src/Defaults/Trigger/Post/PostPending.php',
         'BracketSpace\\Notification\\Defaults\\Trigger\\Post\\PostPublished' => __DIR__ . '/../..' . '/src/Defaults/Trigger/Post/PostPublished.php',
+        'BracketSpace\\Notification\\Defaults\\Trigger\\Post\\PostPublishedPrivately' => __DIR__ . '/../..' . '/src/Defaults/Trigger/Post/PostPublishedPrivately.php',
         'BracketSpace\\Notification\\Defaults\\Trigger\\Post\\PostScheduled' => __DIR__ . '/../..' . '/src/Defaults/Trigger/Post/PostScheduled.php',
         'BracketSpace\\Notification\\Defaults\\Trigger\\Post\\PostTrashed' => __DIR__ . '/../..' . '/src/Defaults/Trigger/Post/PostTrashed.php',
         'BracketSpace\\Notification\\Defaults\\Trigger\\Post\\PostTrigger' => __DIR__ . '/../..' . '/src/Defaults/Trigger/Post/PostTrigger.php',
@@ -337,7 +338,7 @@ class ComposerStaticInit67da0f3173284d9d8a30dd1bb2fb081b
         'BracketSpace\\Notification\\Utils\\Settings\\CoreFields\\Button' => __DIR__ . '/../..' . '/src/Utils/Settings/CoreFields/Button.php',
         'BracketSpace\\Notification\\Utils\\Settings\\CoreFields\\Checkbox' => __DIR__ . '/../..' . '/src/Utils/Settings/CoreFields/Checkbox.php',
         'BracketSpace\\Notification\\Utils\\Settings\\CoreFields\\Editor' => __DIR__ . '/../..' . '/src/Utils/Settings/CoreFields/Editor.php',
-        'BracketSpace\\Notification\\Utils\\Settings\\CoreFields\\HTML' => __DIR__ . '/../..' . '/src/Utils/Settings/CoreFields/HTML.php',
+        'BracketSpace\\Notification\\Utils\\Settings\\CoreFields\\HTML' => __DIR__ . '/../..' . '/compat/src-deprecated/Utils/Settings/CoreFields/HTML.php',
         'BracketSpace\\Notification\\Utils\\Settings\\CoreFields\\Image' => __DIR__ . '/../..' . '/src/Utils/Settings/CoreFields/Image.php',
         'BracketSpace\\Notification\\Utils\\Settings\\CoreFields\\Message' => __DIR__ . '/../..' . '/src/Utils/Settings/CoreFields/Message.php',
         'BracketSpace\\Notification\\Utils\\Settings\\CoreFields\\Number' => __DIR__ . '/../..' . '/src/Utils/Settings/CoreFields/Number.php',
@@ -346,6 +347,11 @@ class ComposerStaticInit67da0f3173284d9d8a30dd1bb2fb081b
         'BracketSpace\\Notification\\Utils\\Settings\\CoreFields\\Text' => __DIR__ . '/../..' . '/src/Utils/Settings/CoreFields/Text.php',
         'BracketSpace\\Notification\\Utils\\Settings\\CoreFields\\Url' => __DIR__ . '/../..' . '/src/Utils/Settings/CoreFields/Url.php',
         'BracketSpace\\Notification\\Utils\\Settings\\Field' => __DIR__ . '/../..' . '/src/Utils/Settings/Field.php',
+        'BracketSpace\\Notification\\Utils\\Settings\\Fields\\ErrorLog' => __DIR__ . '/../..' . '/src/Utils/Settings/Fields/ErrorLog.php',
+        'BracketSpace\\Notification\\Utils\\Settings\\Fields\\Export' => __DIR__ . '/../..' . '/src/Utils/Settings/Fields/Export.php',
+        'BracketSpace\\Notification\\Utils\\Settings\\Fields\\Import' => __DIR__ . '/../..' . '/src/Utils/Settings/Fields/Import.php',
+        'BracketSpace\\Notification\\Utils\\Settings\\Fields\\NotificationLog' => __DIR__ . '/../..' . '/src/Utils/Settings/Fields/NotificationLog.php',
+        'BracketSpace\\Notification\\Utils\\Settings\\Fields\\SyncTable' => __DIR__ . '/../..' . '/src/Utils/Settings/Fields/SyncTable.php',
         'BracketSpace\\Notification\\Utils\\Settings\\Group' => __DIR__ . '/../..' . '/src/Utils/Settings/Group.php',
         'BracketSpace\\Notification\\Utils\\Settings\\Section' => __DIR__ . '/../..' . '/src/Utils/Settings/Section.php',
         'BracketSpace\\Notification\\Utils\\WpObjectHelper' => __DIR__ . '/../..' . '/src/Utils/WpObjectHelper.php',
@@ -393,9 +399,9 @@ class ComposerStaticInit67da0f3173284d9d8a30dd1bb2fb081b
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit67da0f3173284d9d8a30dd1bb2fb081b::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit67da0f3173284d9d8a30dd1bb2fb081b::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit67da0f3173284d9d8a30dd1bb2fb081b::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitfd590546b3ebb80118ecd6f27096ae84::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitfd590546b3ebb80118ecd6f27096ae84::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitfd590546b3ebb80118ecd6f27096ae84::$classMap;
 
         }, null, ClassLoader::class);
     }

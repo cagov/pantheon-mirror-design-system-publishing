@@ -262,7 +262,11 @@ abstract class Carrier implements Interfaces\Sendable {
 		$field   = $closure();
 
 		// Setup the field data if it's available.
-		$this->set_field_data( $field, $this->recipients_data );
+		if ( ! empty( $this->recipients_resolved_data ) ) {
+			$this->set_field_data( $field, $this->recipients_resolved_data );
+		} else {
+			$this->set_field_data( $field, $this->recipients_data );
+		}
 
 		return $field;
 	}
@@ -381,7 +385,7 @@ abstract class Carrier implements Interfaces\Sendable {
 		);
 
 		if ( $strip_shortcodes ) {
-			$resolved = preg_replace( '#\[[^\]]+\]#', '', $resolved );
+			$resolved = preg_replace( '@\[([^<>&/\[\]\x00-\x20=]++)@', '', $resolved );
 		} else {
 			$resolved = do_shortcode( $resolved );
 		}

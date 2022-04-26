@@ -3,7 +3,7 @@ Contributors: notification, bracketspace, Kubitomakita, tomaszadamowicz, insejn,
 Tags: notification, notify, alert, email, mail, webhook, API, developer, framework
 Requires at least: 4.9
 Tested up to: 5.8
-Stable tag: 8.0.3
+Stable tag: 8.0.10
 Requires PHP: 7.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -14,7 +14,7 @@ Customisable email and webhook notifications with powerful developer friendly AP
 
 Custom Notifications and Alerts without a hassle. Notify anyone about any action in your WordPress. With powerful Merge Tags, you can endlessly customize your messages. Set unlimited Notifications in your WordPress Admin via the beautiful and intuitive interface within 5 minutes.
 
-[youtube https://www.youtube.com/watch?v=UPqVBhLGTek]
+[youtube https://www.youtube.com/watch?v=gW2KHrT_a7U]
 
 = DEFAULT WORDPRESS EMAILS OVERWRITE =
 
@@ -191,11 +191,10 @@ Along the Trigger specific Merge Tags, you can use the below anywhere:
 * [BuddyPress](https://wordpress.org/plugins/notification-buddypress/) - BuddyPress triggers and integration with their notification system
 * [Signature](https://wordpress.org/plugins/signature-notification/) - add a signature to all your emails automatically
 * [AppPresser](https://bracketspace.com/downloads/notification-apppresser) - push messages to your mobile app built with AppPresser
+* [Email Attachments](https://bracketspace.com/downloads/notification-email-attachments/) - attach files to your notification
 
 *Coming soon* - vote for the extensions
 
-* [Email Attachments](https://bracketspace.com/downloads/notification-email-attachments/) - attach files to your notification
-* [Email Templates](https://bracketspace.com/downloads/notification-email-templates/) - use beautiful templates for your emails
 * [Facebook](https://bracketspace.com/downloads/notification-facebook/) - post messages to Facebook
 * [Twitter](https://bracketspace.com/downloads/notification-twitter/) - post messages to Twitter
 * [Zapier](https://bracketspace.com/downloads/notification-zapier/) - connect any WordPress event with Zapier
@@ -215,6 +214,10 @@ Along the Trigger specific Merge Tags, you can use the below anywhere:
 * [GitHub repository](https://github.com/BracketSpace/Notification)
 * [Report a bug](https://github.com/BracketSpace/Notification/issues/new)
 
+= CUSTOM DEVELOPMENT =
+
+BracketSpace - the company behind this plugin provides [custom WordPress plugin development services](https://bracketspace.com/custom-development/). We can create any custom plugin for you.
+
 == Installation ==
 
 = Requirements =
@@ -233,10 +236,6 @@ Notification can be loaded also as a part of any plugin or theme. To do it just 
 
 == Frequently Asked Questions ==
 
-= How is this plugin different from Better Notifications for WordPress (BNFW)? =
-
-The Notification plugin works very similar to BNFW but it has better codebase and interface. You can read the full comparison in the [Notification vs Better Notifications for WordPress](https://bracketspace.com/notification-vs-better-notifications-for-wordpress/) article.
-
 = How can I test my notifications? =
 
 It's not needed to install 3rd-party plugins to catch your emails or other notifications. The Notification plugin comes with a logger which you can activate in the settings and see all the notification configuration parameters.
@@ -252,6 +251,10 @@ You can also try to activate the debug log in plugin settings to see if the emai
 Ofcourse it is! We are trying to make both parties happy - the Users and Developers. Users got their intuitive and beautiful panel in WordPress Admin and Developers got an awesome API by which they can extend the Notification plugin.
 
 So it doesn't matter if you don't have any coding skills, they are not required to setup the notifications with this plugin.
+
+= How is this plugin different from Better Notifications for WordPress (BNFW)? =
+
+The Notification plugin works very similar to BNFW but it has better codebase and interface. You can read the full comparison in the [Notification vs Better Notifications for WordPress](https://bracketspace.com/notification-vs-better-notifications-for-wordpress/) article.
 
 = How to register my own triggers? =
 
@@ -283,6 +286,10 @@ When using SMTP it's nearly impossible to send more than a dozen emails at once 
 
 Yes, just activate the debug log in the DEBUGGING section of the plugin settings. All notifications will be catched into log visible only to you.
 
+= Can you create a plugin for me? =
+
+Yes! We're offering a [custom plugin development](https://bracketspace.com/custom-development/) services. Feel free to contact us to find out how we can help you.
+
 == Screenshots ==
 
 1. Trigger edit screen
@@ -294,6 +301,48 @@ Yes, just activate the debug log in the DEBUGGING section of the plugin settings
 7. Default email disabler
 
 == Changelog ==
+
+= 8.0.10 =
+
+* [Fixed] User logout trigger. In WordPress 5.5 the context is set properly.
+* [Fixed] Issue with persistent Trigger state if two or more actions assigned to the same trigger were called.
+* [Changed] Carrier's recipients field is now returned with resolved data if available.
+* [Added] Post Published privately trigger.
+
+= 8.0.9 =
+
+* [Fixed] Merge Tags resolver problem caused by overriding the processed trigger instance.
+* [Changed] `notification/should_send` filter is now executed when the queue is processed, not before the notification is added to the queue.
+* [Added] New queue methods: `remove()` and `clear()`.
+
+= 8.0.8 =
+
+* [Fixed] Two or more same triggers processed in the same request overwriting each other data.
+
+= 8.0.7 =
+
+* [Fixed] Shortcode stripping regex that was matching JSON arrays.
+* [Changed] Extensions are now reporting updates even if they are not activated.
+* [Changed] Updated EDD Updater class.
+* [Added] Webhook warning logging when response is not valid.
+
+= 8.0.6 =
+
+* [Fixed] Extension activation notice link.
+* [Fixed] Extension activation process.
+* [Fixed] Incorrect empty merge tag cleaning which was misreading JSON format.
+
+= 8.0.5 =
+
+* [Changed] Updated PHP dependencies.
+
+= 8.0.4 =
+
+* [Changed] Updated PHP dependencies.
+* [Changed] Extension license notice is now printed once and covers all the plugins.
+* [Changed] Some of the core fields like Import/Export now have own setting classes.
+* [Fixed] Remaining template variable escaping.
+* [Removed] HTML Settings field, introduced in v8.0.3. Now it's required to create purpose-specific field classes.
 
 = 8.0.3 =
 

@@ -37,7 +37,7 @@ class Queue {
 	public static function add( CoreNotification $notification, Triggerable $trigger, int $index = null ) {
 		$item = [
 			'notification' => $notification,
-			'trigger'      => $trigger,
+			'trigger'      => clone $trigger,
 		];
 
 		if ( null !== $index ) {
@@ -107,6 +107,27 @@ class Queue {
 		foreach ( self::get() as $index => $item ) {
 			call_user_func( $callback, $index, $item['notification'], $item['trigger'] );
 		}
+	}
+
+	/**
+	 * Clears the queue entirely
+	 *
+	 * @since 8.0.9
+	 * @return void
+	 */
+	public static function clear() {
+		self::$items = [];
+	}
+
+	/**
+	 * Removes an item from the queue
+	 *
+	 * @since 8.0.9
+	 * @param int $index Index of an item to remove.
+	 * @return void
+	 */
+	public static function remove( int $index ) {
+		unset( self::$items[ $index ] );
 	}
 
 }
