@@ -5,7 +5,7 @@ module.exports = {
         namespace: "cagov",
         category: "cagov-design-system",
         textdomain: 'cagov-design-system',
-        dashicon: 'smiley',
+        dashicon: 'format-aside',
 		description: 'Design System Web Component Description',
 		editorScript: "cagov-ds-gutenberg",
 		editorStyle: "cagov-ds-gutenberg",
@@ -14,7 +14,7 @@ module.exports = {
 			"html": true
 		},
 		customScripts: {
-			postbuild: "npm i @cagov/%npm_package_name%"
+			postbuild: "npm i @cagov/$npm_package_name"
 		}
     },
 };
