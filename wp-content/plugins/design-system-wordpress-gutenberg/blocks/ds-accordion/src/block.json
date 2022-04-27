@@ -10,7 +10,7 @@
 	"supports": {
 		"html": true
 	},
-	"textdomain": "ds-accordion",
+	"textdomain": "cagov-design-system",
 	"editorScript": "cagov-ds-gutenberg",
 	"editorStyle": "cagov-ds-gutenberg",
 	"style": "cagov-ds-gutenberg-style"

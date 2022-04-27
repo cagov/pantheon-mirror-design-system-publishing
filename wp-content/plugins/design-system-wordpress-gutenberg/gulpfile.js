@@ -39,16 +39,20 @@ task('build', async function(){
 		}).filter(isNotFile);
 
 	if ( !blocks.length ){
-		fs.writeFileSync('css/gutenberg.css', '');
-		fs.writeFileSync('css/cagov-design-system.css', '');
-		fs.writeFileSync('js/gutenberg.js', '');
-		fs.writeFileSync('js/cagov-design-system.js', '');
+		fs.writeFileSync('build/css/gutenberg.css', '');
+		fs.writeFileSync('build/css/cagov-design-system.css', '');
+		fs.writeFileSync('build/js/gutenberg.js', '');
+		fs.writeFileSync('build/js/cagov-design-system.js', '');
 	}else{
 		parallel(
 			buildGutenberEditorCSS,
 			buildGutenberEditorJS,
 			buildDesignSystemCSS,
-			buildDesignSystemJS		
+			buildDesignSystemJS,
+			buildGutenberEditorCSSDebug, // Can split these out
+			buildGutenberEditorJSDebug,
+			buildDesignSystemCSSDebug,
+			buildDesignSystemJSDebug	
 		)();
 	}
 	
@@ -74,14 +78,14 @@ async function buildGutenbergBlocks(){
  * Build Gutenberg Block Editor CSS file
  */
 async function buildGutenberEditorCSS(){
-	del(['css/gutenberg.css']);
+	del(['build/css/gutenberg.css']);
 
     // Gutenberg Block Editor CSS
     if (gutenbergEditorCSS.length){
 		src(gutenbergEditorCSS.concat(designSystemCSS))
 			.pipe(lineec()) // Consistent Line Endings for non UNIX systems.
 			.pipe(concat('gutenberg.css')) // compiled file
-			.pipe(dest('css/'))
+			.pipe(dest('build/css/'))
 			.pipe(tap(function (file) {
 				log('[ ✅ Gutenberg Block Editor CSS ] ' + path.basename(file.path) + ' was created successfully.');
 			}))
@@ -92,14 +96,14 @@ async function buildGutenberEditorCSS(){
  * Build Gutenberg Block Editor JS file
  */
 async function buildGutenberEditorJS(){
-	del(['js/gutenberg.js']);
+	del(['build/js/gutenberg.js']);
 	
     // Gutenberg Block Editor JS
 	if (gutenbergEditorJS.length){
 		src(gutenbergEditorJS)
 		.pipe(lineec()) // Consistent Line Endings for non UNIX systems.
 		.pipe(concat('gutenberg.js')) // compiled file
-		.pipe(dest('js/'))
+		.pipe(dest('build/js/'))
 		.pipe(tap(function (file) {
 			log('[ ✅ Gutenberg Block Editor JS ] ' + path.basename(file.path) + ' was created successfully.');
 		}))
@@ -111,7 +115,7 @@ async function buildGutenberEditorJS(){
  * Build Design System CSS file
  */
 async function buildDesignSystemCSS(){
-	del(['css/cagov-design-system.css']);
+	del(['build/css/cagov-design-system.css']);
 
 	// Design System Front End CSS
 	if (designSystemCSS.length){
@@ -123,7 +127,7 @@ async function buildDesignSystemCSS(){
 		)
 		.pipe(lineec()) // Consistent Line Endings for non UNIX systems.
 		.pipe(concat('cagov-design-system.css')) // compiled file
-		.pipe(dest('css/'))
+		.pipe(dest('build/css/'))
 		.pipe(tap(function (file) {
 			log('[ ✅ Design System Frontend CSS ] ' + path.basename(file.path) + ' was created successfully.');
 		}))
@@ -135,14 +139,94 @@ async function buildDesignSystemCSS(){
  * Build Design System JS file
  */
 async function buildDesignSystemJS(){
-	del(['js/cagov-design-system.js']);
+	del(['build/js/cagov-design-system.js']);
 
 	// Design System Front End JS
 	if (designSystemJS.length){
 		src(designSystemJS)
 		.pipe(lineec()) // Consistent Line Endings for non UNIX systems.
 		.pipe(concat('cagov-design-system.js')) // compiled file
-		.pipe(dest('js/'))
+		.pipe(dest('build/js/'))
+		.pipe(tap(function (file) {
+			log('[ ✅ Design System Frontend JS ] ' + path.basename(file.path) + ' was created successfully.');
+		}))
+	}
+}
+
+
+/**
+ * Build Gutenberg Block Editor CSS file
+ */
+ async function buildGutenberEditorCSSDebug(){
+	del(['build/css/gutenberg.css']);
+
+    // Gutenberg Block Editor CSS
+    if (gutenbergEditorCSS.length){
+		src(gutenbergEditorCSS.concat(designSystemCSS))
+			.pipe(lineec()) // Consistent Line Endings for non UNIX systems.
+			.pipe(concat('gutenberg.debug.css')) // compiled file
+			.pipe(dest('build/css/'))
+			.pipe(tap(function (file) {
+				log('[ ✅ Gutenberg Block Editor CSS ] ' + path.basename(file.path) + ' was created successfully.');
+			}))
+	}
+}
+
+/**
+ * Build Gutenberg Block Editor JS file
+ */
+async function buildGutenberEditorJSDebug(){
+	del(['build/js/gutenberg.js']);
+	
+    // Gutenberg Block Editor JS
+	if (gutenbergEditorJS.length){
+		src(gutenbergEditorJS)
+		.pipe(lineec()) // Consistent Line Endings for non UNIX systems.
+		.pipe(concat('gutenberg.debug.js')) // compiled file
+		.pipe(dest('build/js/'))
+		.pipe(tap(function (file) {
+			log('[ ✅ Gutenberg Block Editor JS ] ' + path.basename(file.path) + ' was created successfully.');
+		}))
+	}
+
+}
+
+/**
+ * Build Design System CSS file
+ */
+async function buildDesignSystemCSSDebug(){
+	del(['build/css/cagov-design-system.css']);
+
+	// Design System Front End CSS
+	if (designSystemCSS.length){
+		src(designSystemCSS)
+		.pipe(
+			sass({
+				outputStyle: 'expanded',
+			})
+		)
+		.pipe(lineec()) // Consistent Line Endings for non UNIX systems.
+		.pipe(concat('cagov-design-system.debug.css')) // compiled file
+		.pipe(dest('build/css/'))
+		.pipe(tap(function (file) {
+			log('[ ✅ Design System Frontend CSS ] ' + path.basename(file.path) + ' was created successfully.');
+		}))
+	}
+
+}
+
+/**
+ * Build Design System JS file
+ */
+async function buildDesignSystemJSDebug(){
+	del(['build/js/cagov-design-system.js']);
+
+	// Design System Front End JS
+	if (designSystemJS.length){
+		src(designSystemJS)
+		.pipe(lineec()) // Consistent Line Endings for non UNIX systems.
+		.pipe(concat('cagov-design-system.debug.js')) // compiled file
+		.pipe(dest('build/js/'))
 		.pipe(tap(function (file) {
 			log('[ ✅ Design System Frontend JS ] ' + path.basename(file.path) + ' was created successfully.');
 		}))

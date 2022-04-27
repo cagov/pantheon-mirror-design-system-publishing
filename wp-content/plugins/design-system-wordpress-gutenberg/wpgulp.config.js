@@ -21,4 +21,8 @@ module.exports = {
 	designSystemJS: [ // Design Components JS
 		'blocks/*/node_modules/@cagov/*/dist/index.js'
 	],
+	componentType: { // Attributes to get component type from package JS (coming after adding data to design system packages and updating on npm)
+		attribute: "componentType",
+		path: 'blocks/*/node_modules/@cagov/*/package.json'
+	}
 };

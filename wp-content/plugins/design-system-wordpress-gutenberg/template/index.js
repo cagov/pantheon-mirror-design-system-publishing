@@ -2,11 +2,11 @@ const { join } = require( 'path' );
 
 module.exports = {
     defaultValues: {
-        namespace: "cagov",
+        namespace: "cagov-design-system",
         category: "cagov-design-system",
         textdomain: 'cagov-design-system',
         dashicon: 'format-aside',
-		description: 'Design System Web Component Description',
+		description: 'Design System component description, pull from design system website or project assets from PM',
 		editorScript: "cagov-ds-gutenberg",
 		editorStyle: "cagov-ds-gutenberg",
 		style: "cagov-ds-gutenberg-style",

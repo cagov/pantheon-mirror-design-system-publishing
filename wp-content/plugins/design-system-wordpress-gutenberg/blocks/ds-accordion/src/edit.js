@@ -29,10 +29,21 @@ import './editor.scss';
  *
  * @return {WPElement} Element to render.
  */
-export default function Edit() {
+export default function Edit(props) {
+	console.log("props", props);
 	return (
-		<p { ...useBlockProps() }>
-			{ __( 'Ds Accordion – hello from the editor!', 'ds-accordion' ) }
-		</p>
+		<details>
+		<RichText
+			tagName="summary"
+			value={ attributes.title }
+			onChange={ ( content ) => setAttributes( { content } ) }
+		/>
+		<RichText
+			tagName="div"
+			className="accordion-body"
+			value={ attributes.content }
+			onChange={ ( content ) => setAttributes( { content } ) }
+		/>
+	  </details>
 	);
 }
