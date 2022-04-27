@@ -74,25 +74,4 @@ EOS;
 		return $id;
 	}
 
-	/**
-	 * Get the post object for an attachment.
-	 *
-	 * @param string $pathname Path to file
-	 *
-	 * @returns WP_Post|NULL Nothing is returned if $pathname isn't an attachment.
-	 */
-//	function get_file_attachment($pathname) {
-//		$id = get_file_attachment_id($pathname);
-//		if (($attachment = get_post($id))) {
-//			$meta = get_post_meta($id)
-//				+ [
-//					'_wp_attached_file' => [NULL],
-//					'_wp_attachment_metadata' => [serialize(NULL)],
-//				];
-//			$attachment->file = $meta['_wp_attached_file'][0];
-//			$attachment->meta = unserialize($meta['_wp_attachment_metadata'][0]);
-//			return $attachment;
-//		}
-//		return NULL;
-//	}
 }

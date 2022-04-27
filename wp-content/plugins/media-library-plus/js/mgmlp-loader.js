@@ -1,6 +1,5 @@
 jQuery(document).ready(function(){
   
-    //jQuery("#mgmlp-create-new-folder").click(function(){
     jQuery(document).on("click", "#mgmlp-create-new-folder", function () {
                 
 			jQuery("#folder-message").html('');			
@@ -62,12 +61,10 @@ jQuery(document).ready(function(){
             
     });
 				    
-    //jQuery("#select-media").click(function(){
     jQuery(document).on("click", "#select-media", function () {
       jQuery(".media-attachment, .mgmlp-media").prop("checked", !jQuery(".media-attachment").prop("checked"));
     });
 				            
-    //jQuery("#mgmlp_ajax_upload").click(function(){
     jQuery(document).on("click", "#mgmlp_ajax_upload", function () {
         		
 			jQuery("#folder-message").html('');			
@@ -100,15 +97,14 @@ jQuery(document).ready(function(){
           data: form_data,                         
           type: 'post',
           success: function (data) {
-            jQuery("#ajaxloader").hide();
             jQuery("#mgmlp-file-container").html(data);
+            jQuery("#ajaxloader").hide();
             jQuery('#fileToUpload').val("");
           }
        });
             
     });
 		
-    //jQuery("#mlf-refresh").click(function(e){
     jQuery(document).on("click", "#mlf-refresh", function (e) {
       e.stopImmediatePropagation();                  
 			jQuery("#folder-message").html('');			
@@ -140,7 +136,6 @@ jQuery(document).ready(function(){
     });
 		
         
-    //jQuery("#delete-media").click(function(){
     jQuery(document).on("click", "#delete-media", function (e) {
         
 			jQuery("#folder-message").html('');			
@@ -177,11 +172,11 @@ jQuery(document).ready(function(){
             url : mgmlp_ajax.ajaxurl,
             dataType: "json",
             success: function (data) {
-              jQuery("#ajaxloader").hide();            
 							
 							jQuery("#folder-message").html(data.message);
 							if(data.refresh)
 								jQuery("#mgmlp-file-container").html(data.files);						
+              jQuery("#ajaxloader").hide();            
 																						
             },
             error: function (err)
@@ -190,7 +185,6 @@ jQuery(document).ready(function(){
       } 
     });	
         
-    //jQuery("#copy-media").click(function(){
     jQuery(document).on("click", "#copy-media", function (e) {
       var copy_ids = new Array();
       jQuery('input[type=checkbox].mgmlp-media:checked').each(function() {  
@@ -224,7 +218,6 @@ jQuery(document).ready(function(){
       });                
     });	
     
-    //jQuery("#move-media").click(function(){
     jQuery(document).on("click", "#move-media", function (e) {
       var move_ids = new Array();
       jQuery('input[type=checkbox].mgmlp-media:checked').each(function() {  
@@ -234,7 +227,6 @@ jQuery(document).ready(function(){
       var serial_copy_ids = JSON.stringify(move_ids.join());
       var folder_id = jQuery('#move-select').val();
       var destination = jQuery("#move-select option:selected").text();
-      //var current_folder = jQuery("#current-folder-id").val();      
 			
 			if(jQuery("#current-folder-id").val() === undefined) 
 				var current_folder = sessionStorage.getItem('folder_id');
@@ -251,12 +243,12 @@ jQuery(document).ready(function(){
         url : mgmlp_ajax.ajaxurl,
         dataType: "json",
         success: function (data) {
-          jQuery("#ajaxloader").hide();
           jQuery(".mgmlp-media").prop('checked', false);
           jQuery(".mgmlp-folder").prop('checked', false);
           jQuery("#folder-message").html(data.message);
 					if(data.refresh)
 					  jQuery("#mgmlp-file-container").html(data.files);						
+          jQuery("#ajaxloader").hide();
 					
         },
         error: function (err)
@@ -266,9 +258,7 @@ jQuery(document).ready(function(){
           }
       });                
     });	
-        
-	
-    //jQuery("#add-to-gallery").click(function(){
+        	
     jQuery(document).on("click", "#add-to-gallery", function (e) {
 			
 			jQuery("#folder-message").html('');			
@@ -307,7 +297,6 @@ jQuery(document).ready(function(){
 			}
     });	
     
-    //jQuery("#mgmlp-rename-file").click(function(){
     jQuery(document).on("click", "#mgmlp-rename-file", function (e) {
 			
 			jQuery("#folder-message").html('');			
@@ -316,9 +305,7 @@ jQuery(document).ready(function(){
 				var current_folder = sessionStorage.getItem('folder_id');
 			else
 				var current_folder = jQuery('#current-folder-id').val();
-			
-    
-      //var current_folder = jQuery("#current-folder-id").val();      
+			    
       var image_id = 0;
       var new_file_name = jQuery('#new-file-name').val();
       
@@ -349,12 +336,12 @@ jQuery(document).ready(function(){
         url : mgmlp_ajax.ajaxurl,
         dataType: "html",
         success: function (data) {
-          jQuery("#ajaxloader").hide();
           jQuery("#folder-message").html(data);
 					jQuery('#new-file-name').val('');
           jQuery(".mgmlp-media").prop('checked', false);
           jQuery(".mgmlp-folder").prop('checked', false);
 					mlf_refresh(current_folder);
+          jQuery("#ajaxloader").hide();
         },
         error: function (err) { 
           jQuery("#ajaxloader").hide();
@@ -364,7 +351,6 @@ jQuery(document).ready(function(){
       
     });	
     
-    //jQuery("#mgmlp-sort-order").change(function() {
 	  jQuery(document).on("change", "#mgmlp-sort-order", function () {						
       
       var sort_order = jQuery('#mgmlp-sort-order').val();
@@ -383,8 +369,8 @@ jQuery(document).ready(function(){
         url : mgmlp_ajax.ajaxurl,
         dataType: "html",
         success: function (data) {
-          jQuery("#ajaxloader").hide();
 				  jQuery("#mgmlp-file-container").html(data); 
+          jQuery("#ajaxloader").hide();
         },
         error: function (err) { 
           jQuery("#ajaxloader").hide();
@@ -394,7 +380,6 @@ jQuery(document).ready(function(){
       
     });
 		
-    //jQuery("#move-copy-switch").change(function() {
 	  jQuery(document).on("change", "#move-copy-switch", function () {						
 			
       var move_copy_switch = jQuery('input[type=checkbox]#move-copy-switch:checked').length > 0;
@@ -418,12 +403,6 @@ jQuery(document).ready(function(){
       });                
     });
 		
-    //jQuery('#above-toolbar a').hover(function() {
-    //   jQuery('#folder-message').html(jQuery(this).attr('help')).fadeIn(200);
-    //}, function() {
-    //   jQuery('#folder-message').html('');
-    //});
-    
 	  jQuery(document).on("mouseenter", "#above-toolbar a", function () {						
        jQuery('#folder-message').html(jQuery(this).attr('help')).fadeIn(200);
     });
@@ -431,13 +410,6 @@ jQuery(document).ready(function(){
 	  jQuery(document).on("mouseleave", "#above-toolbar a", function () {						
        jQuery('#folder-message').html('');
     });
-
-        
-    //jQuery('#mgmlp-toolbar a').hover(function() {
-    //   jQuery('#folder-message').html(jQuery(this).attr('help')).fadeIn(200);
-    //}, function() {
-    //   jQuery('#folder-message').html('');
-    //});
     
 	  jQuery(document).on("mouseenter", "#mgmlp-toolbar a", function () {						
        jQuery('#folder-message').html(jQuery(this).attr('help')).fadeIn(200);
@@ -447,12 +419,6 @@ jQuery(document).ready(function(){
        jQuery('#folder-message').html('');
     });
     		
-    //jQuery('#mgmlp-toolbar .onoffswitch').hover(function() {
-    //   jQuery('#folder-message').html(jQuery(this).attr('help')).fadeIn(200);
-    //}, function() {
-    //   jQuery('#folder-message').html('');
-    //});
-    
 	  jQuery(document).on("mouseenter", "#mgmlp-toolbar .onoffswitch", function () {						
        jQuery('#folder-message').html(jQuery(this).attr('help')).fadeIn(200);
     });
@@ -462,16 +428,6 @@ jQuery(document).ready(function(){
     });
     
     
-//    jQuery("#mgmlp-search-media").click(function(){
-//      console.log('click');
-//      var search_value = jQuery('#mgmlp-media-search-input').val();
-//
-//      var home_url = "<?php echo site_url(); ?>"; 
-//
-//      window.location.href = home_url + '/wp-admin/admin.php?page=search-library&' + 's=' + search_value;      
-//    })    
-    
-    //jQuery("#sync-media").click(function(){      
     jQuery(document).on("click", "#sync-media", function (e) {
       
 			if(jQuery("#current-folder-id").val() === undefined) 
@@ -483,8 +439,6 @@ jQuery(document).ready(function(){
 			
 			var mlp_alt_text = jQuery('#mlp_alt_text').val();      
       						
-			//jQuery("#folder-message").html('Scanning for new files and folders...please wait.');						
-			
       jQuery("#ajaxloader").show();
       
 		  run_sync_process('1', parent_folder, mlp_title_text, mlp_alt_text);
@@ -493,12 +447,10 @@ jQuery(document).ready(function(){
 			
     });
     				
-    //jQuery("#seo-images").click(function(){			
     jQuery(document).on("click", "#seo-images", function (e) {
 			jQuery("#folder-message").text("");
     });    
 				
-    //jQuery("#mgmlp-regen-thumbnails").click(function(){
     jQuery(document).on("click", "#mgmlp-regen-thumbnails", function (e) {
       var image_ids = new Array();
       jQuery('input[type=checkbox].mgmlp-media:checked').each(function() {   
@@ -521,9 +473,9 @@ jQuery(document).ready(function(){
         url : mgmlp_ajax.ajaxurl,
         dataType: "html",
         success: function (data) {
-          jQuery("#ajaxloader").hide();
           jQuery(".mgmlp-media").prop('checked', false);
           jQuery("#folder-message").html(data);
+          jQuery("#ajaxloader").hide();
         },
         error: function (err)
           { 
@@ -533,7 +485,6 @@ jQuery(document).ready(function(){
       });                
     });
 				
-		//jQuery("#mlp-update-seo-settings").click(function(){
     jQuery(document).on("click", "#mlp-update-seo-settings", function (e) {
 						
 			var checked = "off";
@@ -551,6 +502,7 @@ jQuery(document).ready(function(){
         dataType: "html",
         success: function (data) {
           jQuery("#folder-message").html(data);
+          window.location.reload();                    
         },
         error: function (err)
           { 
@@ -588,9 +540,7 @@ jQuery(document).ready(function(){
         });
       }
     });   
-    				
-  });    
-				
+    								
 		jQuery("#mgmlp-file-container").on("click", "#display_mlpp_images", function(){
 			var folder_id = jQuery(this).attr('folder_id');
 			var image_link = jQuery(this).attr('image_link');
@@ -630,7 +580,6 @@ jQuery(document).ready(function(){
 					});
     });
 	
-    //jQuery("#mgmlp-create-new-gallery").click(function(){
     jQuery(document).on("click", "#mgmlp-create-new-gallery", function (e) {
       
 			jQuery("#folder-message").html('');			
@@ -660,7 +609,9 @@ jQuery(document).ready(function(){
           { alert(err.responseText);}
       });
            	
-  });  
+    });
+    
+  });    
 			       
 function slideonlyone(thechosenone) {
   jQuery('.input-area').each(function(index) {
@@ -775,7 +726,6 @@ function sendFileToServer(formData,status)
         data: formData,
         success: function(data){
             status.setProgress(100);
-            jQuery("#ajaxloader").hide();
             jQuery("#mgmlp-file-container").html(data);
 
 		        jQuery('li a.media-attachment').draggable({
@@ -797,6 +747,7 @@ function sendFileToServer(formData,status)
 								hoverClass: 'droppable-hover',
 								drop: handleDropEvent
 						});
+            jQuery("#ajaxloader").hide();
 						
         },
         error: function (err){ 
@@ -878,7 +829,6 @@ function handleDropEvent(event, ui ) {
 	var serial_copy_ids = JSON.stringify(move_ids.join());
 	var folder_id = droppableId;
 	var destination = '';
-	//var current_folder = jQuery("#current-folder-id").val();      
 	
 	if(jQuery("#current-folder-id").val() === undefined) 
 		var current_folder = sessionStorage.getItem('folder_id');
@@ -920,7 +870,6 @@ function mlf_refresh(folder_id) {
 	jQuery.ajax({
 		type: "POST",
 		async: true,
-		//data: { action: "mlp_display_folder_contents_ajax", current_folder_id: folder_id, image_link: image_link, display_type: 1, nonce: mgmlp_ajax.nonce },
 		data: { action: "mlp_load_folder", folder: folder_id, nonce: mgmlp_ajax.nonce },
 		url: mgmlp_ajax.ajaxurl,
 		dataType: "html",
@@ -937,7 +886,6 @@ function mlf_refresh(folder_id) {
 
 function mlf_refresh_folders(folder_id) {
   jQuery("#folder-message").html('Refreshing folders...');
-  //var folder_id = jQuery('#current-folder-id').val();
 	
 	if(jQuery("#current-folder-id").val() === undefined) 
 		var folder_id = sessionStorage.getItem('folder_id');
@@ -947,16 +895,13 @@ function mlf_refresh_folders(folder_id) {
 	jQuery.ajax({
 		type: "POST",
 		async: true,
-		//data: { action: "display_folder_nav_ajax", folder: folder_id, nonce: mgmlp_ajax.nonce },
 		data: { action: "mlp_get_folder_data", current_folder_id: folder_id, nonce: mgmlp_ajax.nonce },
 		url: mgmlp_ajax.ajaxurl,
 		dataType: "json",
 		success: function (data) { 
 			jQuery('#folder-tree').jstree(true).settings.core.data = data;
 			jQuery('#folder-tree').jstree(true).refresh();			
-			//jQuery('#folder-tree').jstree(true).redraw(true);
-			
-			
+						
       jQuery("#folder-message").html('');
 		},
 		error: function (err){ 

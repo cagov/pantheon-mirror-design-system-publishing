@@ -1,9 +1,9 @@
-=== WordPress Media Library Folders ===
+=== Media Library Folders ===
 Contributors: maxfoundry, AlanP57
-Tags: WordPress media library folders, media library folders, organize media library
+Tags: media library folders, media library folders, organize media library
 Requires at least: 4.0
-Tested up to: 5.8.2
-Stable tag: 7.0.8
+Tested up to: 5.9.3
+Stable tag: 7.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,7 +13,7 @@ Easier file and folder management for WordPress Media Library for Galleries and 
 [Media Library Folders for WordPress](http://www.maxgalleria.com/downloads/media-library-plus-pro/?utm_source=wordpress&utm_medium=mlfp&utm_content=first&utm_campaign=firstword) creates actual folders in your WordPress Media Library:
 
 * Actual folders make it easier to [organize your WordPress media library](https://maxgalleria.com/organized-wordpress-media-library-folders/?utm_source=wordpress&utm_medium=mlfp&utm_content=organize&utm_campaign=organize) while reducing server burden.
-* [Add and build new WordPress Media library folders](https://maxgalleria.com/add-organize-media-library-folders/) to label and organize as you wish instead of just month/date.
+* [Add and build new Media library folders](https://maxgalleria.com/add-organize-media-library-folders/) to label and organize as you wish instead of just month/date.
 * [Move, copy, rename and delete files and folders](https://maxgalleria.com/wordpress-media-folders-move-rename-delete-folders/) with a nice drag and drop interface
 * Regenerate thumbnails.
 * SEO Images to specify ALT and TITLE attributes when uploading.
@@ -184,6 +184,12 @@ Users can upload multiple files by using drag and drop. When the Add Files butto
 Because most images and files in the media library have corresponding links embedded in site’s posts and pages, Media Library Folders does not allow folders to be rename or moved in order to prevent breaking these links. Rather, to rename or move a folder, one needs to create a new folder and move the files from the old folder to the new. During the move process, Media Library Folders will scan the sites standard posts and pages for any links matching the old address of the images or files and update them to the new address.
 
 == Changelog ==
+= 7.1.0 =
+* Added code to remove dashes from alt text file names
+* Added strict checking to array search when updating customzer settings 
+* Added code to sanitize input and output
+* Fixed issue with adding images in the uploads folder when initializing the plugin
+
 = 7.0.8 =
 * Fixed issue with scanning unreadable folders
 
