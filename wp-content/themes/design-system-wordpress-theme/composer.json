@@ -1,5 +1,5 @@
 {
-    "name": "cagov/cagov-wp-theme-generatepress",
+    "name": "cagov/design-system-wordpress-theme",
     "description": "Packages to help enforce WordPress Coding Standards",
     "require-dev": {
         "wp-coding-standards/wpcs": "^2.3",

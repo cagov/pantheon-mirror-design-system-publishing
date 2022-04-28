@@ -1,7 +1,10 @@
 <?php
 
 /**
- * CA Design System WordPress Theme
+ * cagov theme
+ * This theme is a child theme of design-system-wordpress-theme, a performant WordPress theme.
+ * We hope to create a parent theme out of this. 
+ * If that's going to be useful to you, please reach out on Github.
  *
  * @package ca-design-system
  */
@@ -11,25 +14,25 @@ if (!defined('ABSPATH')) {
 }
 
 // Set our theme version.
-define('CAGOV_THEME__VERSION', '0.3.0');
+define('CAGOV_THEME__VERSION', '1.0.2');
 define('CAGOV_THEME__DIR_PATH', plugin_dir_path(__FILE__));
 
 /** Remove all Generate Press CSS */
-// function cagov_theme_deregister_styles()
+// function cagov_deregister_styles()
 // {
 
 // }
 
-// add_action('wp_print_styles', 'cagov_theme_deregister_styles', 100);
+// add_action('wp_print_styles', 'cagov_deregister_styles', 100);
 
-/* Remove unnecessary cagov-wp-theme code.  */
-function cagov_theme_deregister_javascript()
+/* Remove unnecessary design-system-wordpress-theme code.  */
+function cagov_deregister_javascript()
 {
 	/* Remove jQuery */
 	wp_deregister_script('jquery');
 }
-add_action('wp_print_scripts', 'cagov_theme_deregister_javascript', 100);
-add_action('wp_enqueue_scripts', 'cagov_theme_deregister_javascript');
+add_action('wp_print_scripts', 'cagov_deregister_javascript', 100);
+add_action('wp_enqueue_scripts', 'cagov_deregister_javascript');
 
 // Load Design System stylesheets
 function theme_styles()
@@ -38,27 +41,27 @@ function theme_styles()
 	// wp_enqueue_style('main', get_stylesheet_directory_uri() . '/style.css');
 
 	// Load setting from theme settings.
-	$cagov_theme_color_theme_setting = get_theme_mod('cagov_theme_color_theme', 'cagov');
-	$cagov_theme_color_theme = "" !== $cagov_theme_color_theme_setting ? $cagov_theme_color_theme_setting : "cagov";
+	$cagov_color_theme_setting = get_theme_mod('cagov_color_theme', 'cagov');
+	$cagov_color_theme = "" !== $cagov_color_theme_setting ? $cagov_color_theme_setting : "cagov";
 
 	// REFERENCE: toggle back to stylesheets (good for development, but not performance)
-	// wp_enqueue_style('custom', get_stylesheet_directory_uri() . '/css/' . $cagov_theme_color_theme . '.1_0_3.css');
+	// wp_enqueue_style('custom', get_stylesheet_directory_uri() . '/css/' . $cagov_color_theme . '.1_0_3.css');
 	// wp_enqueue_style('cagov-navigation', get_stylesheet_directory_uri() . '/css/ds-cagov-navigation.css');
 
 	// @TODO Faster, lighter loading? 
 	// @TODO reconnect with CDN code after we document the process.
-	// $css_theme_colors = file_get_contents( get_stylesheet_directory_uri() . '/css/' . $cagov_theme_color_theme . '.1_0_3.css');
+	// $css_theme_colors = file_get_contents( get_stylesheet_directory_uri() . '/css/' . $cagov_color_theme . '.1_0_3.css');
 
 
 	// Local build
 	$css_theme_colors = file_get_contents(get_stylesheet_directory_uri() . '/components/design-system-dist-manager/build/cagov.css');
 	try {
-		$css_theme_colors = file_get_contents(get_stylesheet_directory_uri() . '/components/design-system-dist-manager/build/' . $cagov_theme_color_theme . '.css');
+		$css_theme_colors = file_get_contents(get_stylesheet_directory_uri() . '/components/design-system-dist-manager/build/' . $cagov_color_theme . '.css');
 	} catch (Exception $e) {
 	} finally {
 	}
 
-	// Warning: file_get_contents(https://dev-cannabis-ca-gov.pantheonsite.io/wp-content/themes/cagov-wp-theme/components/design-system-dist-manager/build/cannabis.css): failed to open stream: HTTP request failed! HTTP/1.1 404 Not Found in /code/wp-content/themes/cagov-wp-theme/functions.php on line 56
+	// Warning: file_get_contents(https://dev-cannabis-ca-gov.pantheonsite.io/wp-content/themes/design-system-wordpress-theme/components/design-system-dist-manager/build/cannabis.css): failed to open stream: HTTP request failed! HTTP/1.1 404 Not Found in /code/wp-content/themes/design-system-wordpress-theme/functions.php on line 56
 
 	$css_navigation = file_get_contents(get_stylesheet_directory_uri() . '/css/ds-cagov-navigation.css');
 
@@ -66,7 +69,7 @@ function theme_styles()
 
 	// Debugging CSS
 	
-	// wp_enqueue_style('cagov-5-5', get_stylesheet_directory_uri() . '/css/cagov_theme_5_5.css');
+	// wp_enqueue_style('cagov-5-5', get_stylesheet_directory_uri() . '/css/cagov_5_5.css');
 	// wp_enqueue_style('cagov-merge', get_stylesheet_directory_uri() . '/css/merge.css');
 	// wp_enqueue_style('cagov-5-5', get_stylesheet_directory_uri() . '/css/manual.css');
 
@@ -85,7 +88,7 @@ add_action('wp_enqueue_scripts', 'theme_styles');
  *
  * @return void
  */
-function cagov_theme_header_scripts()
+function cagov_header_scripts()
 {
 	/* Register cagov scripts */
 
@@ -95,15 +98,15 @@ function cagov_theme_header_scripts()
 	wp_enqueue_script('twitter-timeline');
 
     wp_register_script(
-        'cagov-wp-theme-custom-js',
+        'design-system-wordpress-theme-custom-js',
         get_stylesheet_directory_uri() . '/js/custom.js',
         array()
     );
 
-	wp_enqueue_script('cagov-wp-theme-custom-js');
+	wp_enqueue_script('design-system-wordpress-theme-custom-js');
 
 }
-add_action('wp_enqueue_scripts', 'cagov_theme_header_scripts');
+add_action('wp_enqueue_scripts', 'cagov_header_scripts');
 
 /* Add theme UI code, most of which is based off GeneratePress, but renamed */
 require_once CAGOV_THEME__DIR_PATH . '/inc/theme_functions.php';
@@ -124,15 +127,15 @@ register_nav_menu('statewide-footer-menu', __('Statewide Footer Menu'));
  * CADesignSystem Page/Post Templates
  * Adds CADesignSystem page/post templates.
  *
- * @category add_filter( 'theme_page_templates', 'cagov_theme_register_page_post_templates', 20 );
+ * @category add_filter( 'theme_page_templates', 'cagov_register_page_post_templates', 20 );
  * @link https://developer.wordpress.org/reference/hooks/theme_page_templates/
  * @param  array $theme_templates Array of page templates. Keys are filenames, values are translated names.
  *
  * @return array
  */
-function cagov_theme_register_page_post_templates($theme_templates)
+function cagov_register_page_post_templates($theme_templates)
 {
-    return array_merge($theme_templates, cagov_theme_get_page_post_templates());
+    return array_merge($theme_templates, cagov_get_page_post_templates());
 }
 
 
@@ -141,7 +144,7 @@ function cagov_theme_register_page_post_templates($theme_templates)
  *
  * @return array
  */
-function cagov_theme_get_page_post_templates() {
+function cagov_get_page_post_templates() {
 	$templates = array();
 
 	foreach ( glob( 
@@ -162,8 +165,8 @@ function cagov_theme_get_page_post_templates() {
 	return $templates;
 }
 
-
-add_filter('theme_page_templates', 'cagov_theme_register_page_post_templates', 20); // @NOTE: this is disabled in the plugin - toggle between these if you need the templates to be agnostic to the theme (which could happen - the templates are used as data in headless and themes are not really meant to act as data - we are building a headless/monolith hybrid system, so this matters.)
+add_filter( 'show_admin_bar', '__return_false' );
+add_filter('theme_page_templates', 'cagov_register_page_post_templates', 20); // @NOTE: this is disabled in the plugin - toggle between these if you need the templates to be agnostic to the theme (which could happen - the templates are used as data in headless and themes are not really meant to act as data - we are building a headless/monolith hybrid system, so this matters.)
 
 // In order of appearance on page
 require_once CAGOV_THEME__DIR_PATH . '/includes/statewide-header.php';
