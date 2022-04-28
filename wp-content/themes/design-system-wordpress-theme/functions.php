@@ -2,7 +2,7 @@
 
 /**
  * cagov theme
- * This theme is a child theme of cagov-wp-theme, a performant WordPress theme.
+ * This theme is a child theme of design-system-wordpress-theme, a performant WordPress theme.
  * We hope to create a parent theme out of this. 
  * If that's going to be useful to you, please reach out on Github.
  *
@@ -25,7 +25,7 @@ define('CAGOV_THEME__DIR_PATH', plugin_dir_path(__FILE__));
 
 // add_action('wp_print_styles', 'cagov_deregister_styles', 100);
 
-/* Remove unnecessary cagov-wp-theme code.  */
+/* Remove unnecessary design-system-wordpress-theme code.  */
 function cagov_deregister_javascript()
 {
 	/* Remove jQuery */
@@ -61,7 +61,7 @@ function theme_styles()
 	} finally {
 	}
 
-	// Warning: file_get_contents(https://dev-cannabis-ca-gov.pantheonsite.io/wp-content/themes/cagov-wp-theme/components/design-system-dist-manager/build/cannabis.css): failed to open stream: HTTP request failed! HTTP/1.1 404 Not Found in /code/wp-content/themes/cagov-wp-theme/functions.php on line 56
+	// Warning: file_get_contents(https://dev-cannabis-ca-gov.pantheonsite.io/wp-content/themes/design-system-wordpress-theme/components/design-system-dist-manager/build/cannabis.css): failed to open stream: HTTP request failed! HTTP/1.1 404 Not Found in /code/wp-content/themes/design-system-wordpress-theme/functions.php on line 56
 
 	$css_navigation = file_get_contents(get_stylesheet_directory_uri() . '/css/ds-cagov-navigation.css');
 
@@ -98,12 +98,12 @@ function cagov_header_scripts()
 	wp_enqueue_script('twitter-timeline');
 
     wp_register_script(
-        'cagov-wp-theme-custom-js',
+        'design-system-wordpress-theme-custom-js',
         get_stylesheet_directory_uri() . '/js/custom.js',
         array()
     );
 
-	wp_enqueue_script('cagov-wp-theme-custom-js');
+	wp_enqueue_script('design-system-wordpress-theme-custom-js');
 
 }
 add_action('wp_enqueue_scripts', 'cagov_header_scripts');

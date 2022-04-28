@@ -35,18 +35,20 @@ export default function Edit(props) {
 	let { setAttributes } = props;
 	let {title, content} = props.attributes;
 	return (
-		<details>
-		<RichText
-			tagName="summary"
-			value={ title }
-			onChange={ ( title ) => setAttributes( { title } ) }
-		/>
-		<RichText
-			tagName="div"
-			className="accordion-body"
-			value={ content }
-			onChange={ ( content ) => setAttributes( { content } ) }
-		/>
-	  </details>
+		<cagov-accordion>
+			<details>
+				<RichText
+					tagName="summary"
+					value={ title }
+					onChange={ ( title ) => setAttributes( { title } ) }
+				/>
+				<RichText
+					tagName="div"
+					className="accordion-body"
+					value={ content }
+					onChange={ ( content ) => setAttributes( { content } ) }
+				/>
+		</details>
+	  </cagov-accordion>
 	);
 }

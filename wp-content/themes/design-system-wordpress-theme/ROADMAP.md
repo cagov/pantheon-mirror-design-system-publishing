@@ -1,11 +1,11 @@
 # Roadmap
 
 ## 1.0.1+
-* Document alterations to cagov-wp-theme: https://github.com/cagov/cagov-wp-theme-generate-press/issues/2
+* Document alterations to design-system-wordpress-theme: https://github.com/cagov/design-system-wordpress-theme-generate-press/issues/2
 * Document CDN source code
 * Document CDN compilation for design system integration teams.
-* Color theme customizer: https://github.com/cagov/cagov-wp-theme-generate-press/issues/4
-* Add site settings to theme https://github.com/cagov/cagov-wp-theme-generate-press/issues/5
+* Color theme customizer: https://github.com/cagov/design-system-wordpress-theme-generate-press/issues/4
+* Add site settings to theme https://github.com/cagov/design-system-wordpress-theme-generate-press/issues/5
 * Make theme provide REST API to give data to WP sites
 * Make a PM communications roadmap doc explaining this work we are doing, link up with other publishing work.
 * Launch theme on pantheon (cannabis, drought, etc.)

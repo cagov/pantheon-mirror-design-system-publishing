@@ -3,7 +3,7 @@
 /**
  * The template used for displaying page content in page.php
  *
- * @package cagov-wp-theme
+ * @package design-system-wordpress-theme
  */
 
 if (!defined('ABSPATH')) {

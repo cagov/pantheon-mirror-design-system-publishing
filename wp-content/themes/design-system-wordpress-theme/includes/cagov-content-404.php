@@ -2,7 +2,7 @@
 /**
  * The template for displaying 404 pages.
  *
- * @package cagov-wp-theme
+ * @package design-system-wordpress-theme
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

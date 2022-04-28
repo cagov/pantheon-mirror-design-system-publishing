@@ -1,7 +1,7 @@
 // Page Navigation and branding
-import '@cagov/ds-back-to-top/src'; 
+import '@cagov/ds-back-to-top'; 
 // import './back-to-top/src/index.js';
-import '@cagov/ds-content-navigation'; 
+import '@cagov/ds-content-navigation/dist/index.js'; 
 // import './content-navigation/src/index.js';
 import '@cagov/ds-dropdown-menu'; 
 // import './dropdown-menu/src/index.js';

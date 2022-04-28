@@ -25,7 +25,7 @@ if (!defined('ABSPATH')) {
 
 // Plugin constants.
 define( 'CAGOV_DESIGN_SYSTEM_GUTENBERG', __DIR__ );
-define( 'CAGOV_DESIGN_SYSTEM_GUTENBERG__VERSION', '1.2.0.2' );
+define( 'CAGOV_DESIGN_SYSTEM_GUTENBERG__VERSION', '1.2.0.3' );
 define( 'CAGOV_DESIGN_SYSTEM_GUTENBERG_URI', esc_url(str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__)) );
 define( 'CAGOV_DESIGN_SYSTEM_GUTENBERG__DEBUG', true ); // Can associate with env variable later & default to false
 
@@ -33,10 +33,41 @@ define( 'CAGOV_DESIGN_SYSTEM_GUTENBERG__DEBUG', true ); // Can associate with en
 // define( 'CAGOV_DESIGN_SYSTEM_BUNDLE', "https://cdn.designsystem.webstandards.ca.gov/bundles/v1.0.0/cagov-design-system.main.js" ); // Bundle 
 // define( 'CAGOV_DESIGN_SYSTEM_BUNDLE', "https://cdn.designsystem.webstandards.ca.gov/bundles/v1.0.0/cagov-design-system.staging.js" ); // Bundle 
 define( 'CAGOV_DESIGN_SYSTEM_BUNDLE', "https://cdn.designsystem.webstandards.ca.gov/bundles/v1.0.0/cagov-design-system.development.js" ); // Bundle instructions
-define( 'CAGOV_DESIGN_SYSTEM_BUNDLE_LOCAL', CAGOV_DESIGN_SYSTEM_GUTENBERG_URI . "/js/cagov-design-system.core.js"); // Bundle instructions
+define( 'CAGOV_DESIGN_SYSTEM_BUNDLE_LOCAL', CAGOV_DESIGN_SYSTEM_GUTENBERG_URI . "/build/js/cagov-design-system.core.js"); // Bundle instructions
 
 add_action( 'init', 'cagov_ds_gutenberg_enqueue_block_editor_assets' );
-add_action( 'wp_enqueue_scripts', 'cagov_ds_gutenberg_wp_enqueue_scripts', 99999999 );
+// add_action( 'wp_enqueue_scripts', 'cagov_ds_gutenberg_wp_enqueue_scripts', 99999 ); // Not needed yet but very likely will be.
+
+add_action('wp_enqueue_scripts', 'cagov_ds_gutenberg_enqueue_header_scripts', 10);
+add_filter('script_loader_tag', 'cagov_ds_gutenberg_add_type_attribute' , 10, 3);
+
+/**
+ * Load custom styles
+ */
+function cagov_ds_gutenberg_wp_enqueue_scripts(){
+	// wp_enqueue_style( 'cagov-design-system-style', $core_css, array(), CAGOV_DESIGN_SYSTEM_BUNDLE ); // For debugging, Design System bundle has no CSS, but can use this for debugging when there is a bug in the Design System.
+}
+
+function cagov_ds_gutenberg_enqueue_header_scripts()
+{
+    
+	$handle  = 'cagov-design-system-components-script';
+	$src     = CAGOV_DESIGN_SYSTEM_BUNDLE_LOCAL;
+	$deps    = [];
+	$version = CAGOV_DESIGN_SYSTEM_GUTENBERG__VERSION;
+	wp_enqueue_script( $handle, $src, $deps, $version, true );
+}
+
+function cagov_ds_gutenberg_add_type_attribute($tag, $handle, $src) {
+    // Register script as module
+    if ( 'cagov-design-system-components-script' !== $handle ) {
+        return $tag;
+    }
+    
+    $tag = '<script type="module" src="' . esc_url( $src ) . '"></script>';
+    return $tag;
+}
+
 
 /**
  * Include Gutenberg Block assets by getting the index file of each block build file.
@@ -83,16 +114,6 @@ function cagov_ds_gutenberg_enqueue_block_editor_assets(){
             register_block_type(strtolower(CAGOV_DESIGN_SYSTEM_GUTENBERG . "/blocks/$name/src"));
         }
     }
-
-
-}
-
-/**
- * Load custom styles
- */
-function cagov_ds_gutenberg_wp_enqueue_scripts(){
-	// wp_enqueue_style( 'cagov-design-system-style', $core_css, array(), CAGOV_DESIGN_SYSTEM_BUNDLE ); // For debugging, Design System bundle has no CSS, but can use this for debugging when there is a bug in the Design System.
-	wp_enqueue_script( 'cagov-design-system-script', $core_js, array( '' ), CAGOV_DESIGN_SYSTEM_BUNDLE_LOCAL, true ); // Build first version in DS and use development version, manually copied. Then put on CDN. Then write method to update the local version. Belongs in build folder.
 }
 
 /**
@@ -131,4 +152,35 @@ function cagov_ds_gutenberg_get_min_file( $f, $ext = 'css' ) {
 	} else {
 		return CAGOV_DESIGN_SYSTEM_GUTENBERG_URI . $f;
 	}
+}
+
+/** If we want to remove any blocks or patterns from Gutenberg, this is how we can do it. */
+function cagov_ds_gutenberg_allowed_block_types($allowed_blocks)
+{
+    // remove_theme_support('core-block-patterns');
+    // return array(
+    //     'core/image',
+    //     'core/paragraph',
+    //     'core/heading',
+    //     'core/list',
+    //     // 'core/custom-html',
+    //     'core/classic',      
+    //     'ca-design-system/accordion',
+    //     'ca-design-system/card',
+    //     'ca-design-system/card-grid',
+    //     'ca-design-system/content-navigation',
+    //     'ca-design-system/feature-card',
+    //     'ca-design-system/page-alert',
+    //     'ca-design-system/promotional-card',
+    //     'ca-design-system/regulatory-outline',
+    //     'ca-design-system/scrollable-card',
+    //     'ca-design-system/step-list',
+    //     'ca-design-system/table',
+    //     // @TODO move to patterns
+    //     'ca-design-system/post-list',
+    //     'ca-design-system/event-detail',
+    //     'ca-design-system/event-materials',
+    //     'ca-design-system/event-list',
+    //     'ca-design-system/event-pattern'
+    // );
 }

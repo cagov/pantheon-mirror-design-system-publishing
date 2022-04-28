@@ -24,12 +24,13 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 export default function save(props) {
 	let {title, content} = props.attributes;
-	console.log(content);
 	return (
-	  <details>
-		  test
-		<summary>{title}</summary>
-		<div class="accordion-body">{content}</div>
-	  </details>
+	<cagov-accordion>
+		<details>
+			test
+			<summary>{title}</summary>
+			<div class="accordion-body">{content}</div>
+		</details>
+	  </cagov-accordion>
 	);
 }

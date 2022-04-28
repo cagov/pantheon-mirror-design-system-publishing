@@ -62,7 +62,7 @@ function Edit(props) {
     title,
     content
   } = props.attributes;
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("details", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.RichText, {
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("cagov-accordion", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("details", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.RichText, {
     tagName: "summary",
     value: title,
     onChange: title => setAttributes({
@@ -75,7 +75,7 @@ function Edit(props) {
     onChange: content => setAttributes({
       content
     })
-  }));
+  })));
 }
 
 /***/ }),
@@ -198,10 +198,9 @@ function save(props) {
     title,
     content
   } = props.attributes;
-  console.log(content);
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("details", null, "test", (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("summary", null, title), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("cagov-accordion", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("details", null, "test", (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("summary", null, title), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     class: "accordion-body"
-  }, content));
+  }, content)));
 }
 
 /***/ }),

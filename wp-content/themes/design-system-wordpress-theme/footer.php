@@ -2,7 +2,7 @@
 /**
  * The template for displaying the footer.
  *
- * @package cagov-wp-theme
+ * @package design-system-wordpress-theme
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -67,7 +67,7 @@ wp_footer();
 <!-- Use locally compiled design system components. We can do this until we have CDN hosts for modular content. 
 To compile, run build in components directory.
 @TODO Q: can we do this in functions instead so we can manage the script order & performance  -->
-<script type="module" src='wp-content/themes/cagov-wp-theme-generate-press/components/design-system-dist-manager/dist/index.js'></script>
+<script type="module" src='wp-content/themes/design-system-wordpress-theme/components/design-system-dist-manager/build/index.js'></script>
 
 </body>
 </html>
