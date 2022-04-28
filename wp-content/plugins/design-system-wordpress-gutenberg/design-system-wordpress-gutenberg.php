@@ -24,10 +24,17 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants.
-define('CAGOV_DESIGN_SYSTEM_GUTENBERG__DEBUG', true); // Can associate with env variable later & default to false
-define('CAGOV_DESIGN_SYSTEM_GUTENBERG__VERSION', '1.2.0.2');
 define( 'CAGOV_DESIGN_SYSTEM_GUTENBERG', __DIR__ );
+define( 'CAGOV_DESIGN_SYSTEM_GUTENBERG__VERSION', '1.2.0.2' );
 define( 'CAGOV_DESIGN_SYSTEM_GUTENBERG_URI', esc_url(str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__)) );
+define( 'CAGOV_DESIGN_SYSTEM_GUTENBERG__DEBUG', true ); // Can associate with env variable later & default to false
+
+// define( 'CAGOV_DESIGN_SYSTEM_BUNDLE', "https://cdn.designsystem.webstandards.ca.gov/bundles/v1.0.0/cagov-design-system.min.js" ); // Bundle 
+// define( 'CAGOV_DESIGN_SYSTEM_BUNDLE', "https://cdn.designsystem.webstandards.ca.gov/bundles/v1.0.0/cagov-design-system.main.js" ); // Bundle 
+// define( 'CAGOV_DESIGN_SYSTEM_BUNDLE', "https://cdn.designsystem.webstandards.ca.gov/bundles/v1.0.0/cagov-design-system.staging.js" ); // Bundle 
+define( 'CAGOV_DESIGN_SYSTEM_BUNDLE', "https://cdn.designsystem.webstandards.ca.gov/bundles/v1.0.0/cagov-design-system.development.js" ); // Bundle instructions
+define( 'CAGOV_DESIGN_SYSTEM_BUNDLE_LOCAL', CAGOV_DESIGN_SYSTEM_GUTENBERG_URI . "/js/cagov-design-system.core.js"); // Bundle instructions
+
 add_action( 'init', 'cagov_ds_gutenberg_enqueue_block_editor_assets' );
 add_action( 'wp_enqueue_scripts', 'cagov_ds_gutenberg_wp_enqueue_scripts', 99999999 );
 
@@ -84,10 +91,8 @@ function cagov_ds_gutenberg_enqueue_block_editor_assets(){
  * Load custom styles
  */
 function cagov_ds_gutenberg_wp_enqueue_scripts(){
-    $core_css = CAGOV_DESIGN_SYSTEM_GUTENBERG_URI . '/css/cagov-design-system.core.css'; // ?
-	$core_js = CAGOV_DESIGN_SYSTEM_GUTENBERG_URI . '/js/cagov-design-system.core.js'; // ?
-	wp_enqueue_style( 'cagov-design-system-style', $core_css, array(), CAGOV_DESIGN_SYSTEM_GUTENBERG__VERSION );
-	wp_enqueue_script( 'cagov-design-system-script', $core_js, array( '' ), CAGOV_DESIGN_SYSTEM_GUTENBERG__VERSION, true );
+	// wp_enqueue_style( 'cagov-design-system-style', $core_css, array(), CAGOV_DESIGN_SYSTEM_BUNDLE ); // For debugging, Design System bundle has no CSS, but can use this for debugging when there is a bug in the Design System.
+	wp_enqueue_script( 'cagov-design-system-script', $core_js, array( '' ), CAGOV_DESIGN_SYSTEM_BUNDLE_LOCAL, true ); // Build first version in DS and use development version, manually copied. Then put on CDN. Then write method to update the local version. Belongs in build folder.
 }
 
 /**
