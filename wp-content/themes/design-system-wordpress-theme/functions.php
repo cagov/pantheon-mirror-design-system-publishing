@@ -1,12 +1,9 @@
 <?php
 
 /**
- * cagov theme
- * This theme is a child theme of design-system-wordpress-theme, a performant WordPress theme.
- * We hope to create a parent theme out of this. 
- * If that's going to be useful to you, please reach out on Github.
+ * A clean, performant implementation of the CA Design System in WordPress
  *
- * @package ca-design-system
+ * @package cagov-design-system
  */
 
 if (!defined('ABSPATH')) {

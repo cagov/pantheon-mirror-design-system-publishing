@@ -1,12 +1,15 @@
 /*
- Theme Name:   design-system-wordpress-theme
- Theme URI:    https://github.com/cagov/design-system-wordpress-theme-generate-press
+ Theme Name:   CA Design System WordPress Theme
+ Theme URI:    https://github.com/cagov/design-system-wordpress-theme
  Description:  ca.gov WordPress theme based on CA Design System
  Author:       Office of Digital Innovation (ODI)
  Author URI:   https://digital.ca.gov
- Version:      1.0.1
+ Version:      1.0.2
+ Requires at least: 5.9
+ Tested up to: 5.9
+ Requires PHP: 5.6
  License:      GNU General Public License v2 or later
  License URI:  http://www.gnu.org/licenses/gpl-2.0.html
  Tags:         light, dark, two-columns, right-sidebar, responsive-layout, accessibility-ready
- Text Domain:  design-system-wordpress-theme
+ Text Domain:  cagov-design-system
 */
