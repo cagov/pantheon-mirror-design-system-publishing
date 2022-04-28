@@ -23,11 +23,13 @@ import { useBlockProps } from '@wordpress/block-editor';
  * @return {WPElement} Element to render.
  */
 export default function save(props) {
-	console.log("props", props);
+	let {title, content} = props.attributes;
+	console.log(content);
 	return (
 	  <details>
-		<summary>{attributes.title}</summary>
-		<div class="accordion-body">{attributes.content}</div>
+		  test
+		<summary>{title}</summary>
+		<div class="accordion-body">{content}</div>
 	  </details>
 	);
 }

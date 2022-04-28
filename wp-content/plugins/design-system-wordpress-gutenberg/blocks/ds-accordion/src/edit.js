@@ -19,6 +19,7 @@ import { useBlockProps } from '@wordpress/block-editor';
  *
  * @see https://www.npmjs.com/package/@wordpress/scripts#using-css
  */
+import { RichText} from '@wordpress/block-editor';
 import './editor.scss';
 
 /**
@@ -30,18 +31,20 @@ import './editor.scss';
  * @return {WPElement} Element to render.
  */
 export default function Edit(props) {
-	console.log("props", props);
+	console.log(props);
+	let { setAttributes } = props;
+	let {title, content} = props.attributes;
 	return (
 		<details>
 		<RichText
 			tagName="summary"
-			value={ attributes.title }
-			onChange={ ( content ) => setAttributes( { content } ) }
+			value={ title }
+			onChange={ ( title ) => setAttributes( { title } ) }
 		/>
 		<RichText
 			tagName="div"
 			className="accordion-body"
-			value={ attributes.content }
+			value={ content }
 			onChange={ ( content ) => setAttributes( { content } ) }
 		/>
 	  </details>

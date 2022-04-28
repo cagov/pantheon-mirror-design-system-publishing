@@ -43,6 +43,7 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 
+
 /**
  * The edit function describes the structure of your block in the context of the
  * editor. This represents what the editor will render when the block is used.
@@ -53,17 +54,24 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 function Edit(props) {
-  console.log("props", props);
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("details", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(RichText, {
+  console.log(props);
+  let {
+    setAttributes
+  } = props;
+  let {
+    title,
+    content
+  } = props.attributes;
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("details", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.RichText, {
     tagName: "summary",
-    value: attributes.title,
-    onChange: content => setAttributes({
-      content
+    value: title,
+    onChange: title => setAttributes({
+      title
     })
-  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(RichText, {
+  }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.RichText, {
     tagName: "div",
     className: "accordion-body",
-    value: attributes.content,
+    value: content,
     onChange: content => setAttributes({
       content
     })
@@ -81,14 +89,17 @@ function Edit(props) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_blocks__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/blocks */ "@wordpress/blocks");
 /* harmony import */ var _wordpress_blocks__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_blocks__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _style_scss__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./style.scss */ "./src/style.scss");
-/* harmony import */ var _edit__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./edit */ "./src/edit.js");
-/* harmony import */ var _save__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./save */ "./src/save.js");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
+/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _style_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./style.scss */ "./src/style.scss");
+/* harmony import */ var _edit__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./edit */ "./src/edit.js");
+/* harmony import */ var _save__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./save */ "./src/save.js");
 /**
  * Registers a new block provided a unique name and an object defining its behavior.
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/block-api/block-registration/
  */
+
 
 /**
  * Lets webpack process CSS, SASS or SCSS files referenced in JavaScript files.
@@ -124,20 +135,20 @@ __webpack_require__.r(__webpack_exports__);
   },
   example: {
     attributes: {
-      title: __('Title 1', 'cagov-design-system'),
-      body: __('A couple buttons are included inside this accordion to demonstrate that when the accordion is closed they are automatically not in the keyboard focus order but when the accordion opens they become the next available elements in the keyboard navigation sequence after the accordion\'s summary element.', 'cagov-design-system')
+      title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('Title 1', 'cagov-design-system'),
+      body: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_1__.__)('A couple buttons are included inside this accordion to demonstrate that when the accordion is closed they are automatically not in the keyboard focus order but when the accordion opens they become the next available elements in the keyboard navigation sequence after the accordion\'s summary element.', 'cagov-design-system')
     }
   },
 
   /**
    * @see ./edit.js
    */
-  edit: _edit__WEBPACK_IMPORTED_MODULE_2__["default"],
+  edit: _edit__WEBPACK_IMPORTED_MODULE_3__["default"],
 
   /**
    * @see ./save.js
    */
-  save: _save__WEBPACK_IMPORTED_MODULE_3__["default"]
+  save: _save__WEBPACK_IMPORTED_MODULE_4__["default"]
 });
 
 /***/ }),
@@ -183,10 +194,14 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 function save(props) {
-  console.log("props", props);
-  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("details", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("summary", null, attributes.title), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
+  let {
+    title,
+    content
+  } = props.attributes;
+  console.log(content);
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("details", null, "test", (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("summary", null, title), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     class: "accordion-body"
-  }, attributes.content));
+  }, content));
 }
 
 /***/ }),
