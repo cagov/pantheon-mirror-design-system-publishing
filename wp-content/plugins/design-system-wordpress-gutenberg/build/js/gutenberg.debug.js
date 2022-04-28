@@ -60,7 +60,7 @@ function Edit(props) {
   } = props;
   let {
     title,
-    content
+    body
   } = props.attributes;
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("cagov-accordion", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("details", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.RichText, {
     tagName: "summary",
@@ -71,9 +71,9 @@ function Edit(props) {
   }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_2__.RichText, {
     tagName: "div",
     className: "accordion-body",
-    value: content,
-    onChange: content => setAttributes({
-      content
+    value: body,
+    onChange: body => setAttributes({
+      body
     })
   })));
 }
@@ -196,11 +196,11 @@ __webpack_require__.r(__webpack_exports__);
 function save(props) {
   let {
     title,
-    content
+    body
   } = props.attributes;
   return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("cagov-accordion", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("details", null, "test", (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("summary", null, title), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", {
     class: "accordion-body"
-  }, content)));
+  }, body)));
 }
 
 /***/ }),

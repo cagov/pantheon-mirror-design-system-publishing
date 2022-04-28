@@ -23,13 +23,13 @@ import { useBlockProps } from '@wordpress/block-editor';
  * @return {WPElement} Element to render.
  */
 export default function save(props) {
-	let {title, content} = props.attributes;
+	let {title, body} = props.attributes;
 	return (
 	<cagov-accordion>
 		<details>
 			test
 			<summary>{title}</summary>
-			<div class="accordion-body">{content}</div>
+			<div class="accordion-body">{body}</div>
 		</details>
 	  </cagov-accordion>
 	);

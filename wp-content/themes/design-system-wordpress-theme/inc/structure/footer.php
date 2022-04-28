@@ -67,7 +67,7 @@ if ( ! function_exists( 'cagov_construct_footer' ) ) {
 			
 		</div><!--container-->
 		<div class="container pt-0">
-      			<p class="copyright">Copyright © 2021 State of California</p>
+      			<p class="copyright">Copyright © 2022 State of California</p>
    	</div><!--container-->
 	</div><!--bg-light-grey-->
 </footer>

@@ -33,7 +33,7 @@ import './editor.scss';
 export default function Edit(props) {
 	console.log(props);
 	let { setAttributes } = props;
-	let {title, content} = props.attributes;
+	let {title, body} = props.attributes;
 	return (
 		<cagov-accordion>
 			<details>
@@ -45,8 +45,8 @@ export default function Edit(props) {
 				<RichText
 					tagName="div"
 					className="accordion-body"
-					value={ content }
-					onChange={ ( content ) => setAttributes( { content } ) }
+					value={ body }
+					onChange={ ( body ) => setAttributes( { body } ) }
 				/>
 		</details>
 	  </cagov-accordion>
