@@ -38,8 +38,6 @@ define( 'CAGOV_DESIGN_SYSTEM_BUNDLE_LOCAL', CAGOV_DESIGN_SYSTEM_GUTENBERG_URI . 
 add_action( 'init', 'cagov_ds_gutenberg_enqueue_block_editor_assets' );
 // add_action( 'wp_enqueue_scripts', 'cagov_ds_gutenberg_wp_enqueue_scripts', 99999 ); // Not needed yet but very likely will be.
 
-add_action('wp_enqueue_scripts', 'cagov_ds_gutenberg_enqueue_header_scripts', 10);
-add_filter('script_loader_tag', 'cagov_ds_gutenberg_add_type_attribute' , 10, 3);
 
 /**
  * Load custom styles
@@ -50,7 +48,6 @@ function cagov_ds_gutenberg_wp_enqueue_scripts(){
 
 function cagov_ds_gutenberg_enqueue_header_scripts()
 {
-    
 	$handle  = 'cagov-design-system-components-script';
 	$src     = CAGOV_DESIGN_SYSTEM_BUNDLE_LOCAL;
 	$deps    = [];
@@ -63,8 +60,8 @@ function cagov_ds_gutenberg_add_type_attribute($tag, $handle, $src) {
     if ( 'cagov-design-system-components-script' !== $handle ) {
         return $tag;
     }
-    
     $tag = '<script type="module" src="' . esc_url( $src ) . '"></script>';
+    
     return $tag;
 }
 
@@ -78,6 +75,12 @@ function cagov_ds_gutenberg_enqueue_block_editor_assets(){
     $is_under_5_8 = version_compare($wp_version, "5.8", '<') ? '' : '_all';
 
     add_filter("block_categories$is_under_5_8", 'cagov_ds_gutenberg_categories', 10, 2);
+
+
+    add_action('admin_enqueue_scripts', 'cagov_ds_gutenberg_enqueue_header_scripts', 10);
+    add_action('wp_enqueue_scripts', 'cagov_ds_gutenberg_enqueue_header_scripts', 10);
+    add_filter('script_loader_tag', 'cagov_ds_gutenberg_add_type_attribute' , 10, 3);
+
 
 	// Register shared packages.
 	// @TODO check performance after a few components are re-mapped

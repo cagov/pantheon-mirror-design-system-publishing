@@ -1,6 +1,12 @@
 /*!****************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[3].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[3].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[3].use[3]!./src/editor.scss ***!
   \****************************************************************************************************************************************************************************************************************************************/
+.editor-styles-wrapper cagov-accordion details {
+  max-width: 785px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 cagov-accordion:defined details .cagov-open-indicator {
   background-color: var(--primary-color, #064e66);
   height: 3px;
